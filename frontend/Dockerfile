@@ -1,12 +1,15 @@
 FROM node:20-alpine AS build
+RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
 
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY frontend/package.json ./frontend/
+RUN pnpm install --frozen-lockfile --filter frontend
+
+COPY frontend/ ./frontend/
+RUN pnpm --filter frontend run build
 
 FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/frontend/dist /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
