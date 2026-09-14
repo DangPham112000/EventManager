@@ -1,5 +1,6 @@
 FROM node:20-alpine AS build
-RUN corepack enable && corepack prepare pnpm@10.12.1 --activate
+ENV CI=true
+RUN npm install -g pnpm@10.12.1
 
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
