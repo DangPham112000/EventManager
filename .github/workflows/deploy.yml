@@ -33,7 +33,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_PAT }}
 
       - name: Extract metadata for Backend
         id: meta-backend
@@ -75,7 +75,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_PAT }}
 
       - name: Extract metadata for Frontend
         id: meta-frontend
@@ -136,7 +136,7 @@ jobs:
             cd /opt/event-manager
 
             # Login to GHCR on VPS to pull private images if necessary
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Export GITHUB_REPOSITORY so docker compose can use it
             export GITHUB_REPOSITORY=$GITHUB_REPOSITORY
