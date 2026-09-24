@@ -1,20 +1,40 @@
-// TODO: Implement full GraphQL Resolvers
+import { getDataSource } from '../data/index.js';
+import type { CreateEventInput, UpdateEventInput } from '../data/types.js';
+
 export const resolvers = {
   Query: {
-    me: () => {
-      // TODO: Implement
-      return null;
+    me: async () => {
+      const ds = getDataSource();
+      return ds.getUser();
     },
-    getEvents: () => {
-      // TODO: Implement
-      return [];
+
+    getEvents: async () => {
+      const ds = getDataSource();
+      return ds.getEvents();
     },
-    getEvent: (_: any, { id }: { id: string }) => {
-      // TODO: Implement
-      return null;
+
+    getEvent: async (_: unknown, { id }: { id: string }) => {
+      const ds = getDataSource();
+      return ds.getEvent(id);
     },
   },
+
   Mutation: {
-    // TODO: Implement mutations
+    createEvent: async (_: unknown, { input }: { input: CreateEventInput }) => {
+      const ds = getDataSource();
+      return ds.createEvent(input);
+    },
+
+    updateEvent: async (_: unknown, { id, input }: { id: string; input: UpdateEventInput }) => {
+      const ds = getDataSource();
+      const updated = await ds.updateEvent(id, input);
+      if (!updated) throw new Error(`Event with id "${id}" not found`);
+      return updated;
+    },
+
+    deleteEvent: async (_: unknown, { id }: { id: string }) => {
+      const ds = getDataSource();
+      return ds.deleteEvent(id);
+    },
   },
 };

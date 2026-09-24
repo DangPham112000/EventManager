@@ -20,6 +20,22 @@ export const typeDefs = `#graphql
     googleEventId: String
   }
 
+  input CreateEventInput {
+    title: String!
+    description: String
+    startTime: String!
+    endTime: String!
+    location: String
+  }
+
+  input UpdateEventInput {
+    title: String
+    description: String
+    startTime: String
+    endTime: String
+    location: String
+  }
+
   type Query {
     me: User
     getEvents: [Event!]!
@@ -27,6 +43,8 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
-    _empty: String
+    createEvent(input: CreateEventInput!): Event!
+    updateEvent(id: ID!, input: UpdateEventInput!): Event!
+    deleteEvent(id: ID!): Boolean!
   }
 `;
