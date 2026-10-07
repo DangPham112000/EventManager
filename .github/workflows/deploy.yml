@@ -133,19 +133,23 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           envs: GITHUB_REPOSITORY
           script: |
+            set -e
             cd /opt/event-manager
 
-            # Login to GHCR on VPS to pull private images if necessary
-            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Image names on GHCR must be lowercase (repo is DangPham112000/EventManager)
+            export IMAGE_PREFIX=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
 
-            # Export GITHUB_REPOSITORY so docker compose can use it
-            export GITHUB_REPOSITORY=$GITHUB_REPOSITORY
+            # Keep registry credentials in this project only, so the login does not
+            # overwrite the docker config other stacks on the VPS rely on.
+            export DOCKER_CONFIG=/opt/event-manager/.docker
+            mkdir -p "$DOCKER_CONFIG"
+            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Pull new images
             docker compose pull
 
             # Restart services
-            docker compose up -d
+            docker compose up -d --remove-orphans
 
             # Prune dangling unused images (preserves layer cache for fast future pulls)
             docker image prune -f

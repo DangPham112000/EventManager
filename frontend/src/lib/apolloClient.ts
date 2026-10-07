@@ -1,7 +1,11 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client/core';
 
+// Dev talks to the local backend; the production build uses same-origin
+// "/graphql", which the frontend nginx proxies to the backend container.
 const httpLink = new HttpLink({
-  uri: import.meta.env.VITE_GRAPHQL_URL || 'http://localhost:4000/graphql',
+  uri:
+    import.meta.env.VITE_GRAPHQL_URL ||
+    (import.meta.env.DEV ? 'http://localhost:4000/graphql' : '/graphql'),
 });
 
 export const apolloClient = new ApolloClient({
