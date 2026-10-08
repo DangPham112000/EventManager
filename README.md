@@ -45,3 +45,12 @@ The project follows a standard decoupled Client-Server architecture utilizing Gr
         ├── graphql/        # Apollo Client queries and mutations
         └── routes/         # React Router configurations
 ```
+
+## Authentication (Clerk)
+
+Sign-in uses [Clerk](https://clerk.com) (enable Google under *User & authentication → SSO connections*).
+
+- **Frontend:** `VITE_CLERK_PUBLISHABLE_KEY` in `frontend/.env.local` (dev) or the `CLERK_PUBLISHABLE_KEY` GitHub Actions **variable** (production build). Without it the app runs with no sign-in.
+- **Backend:** `CLERK_SECRET_KEY` in `backend/.env` (dev) or the `CLERK_SECRET_KEY` GitHub Actions **secret** (production). It verifies the session token sent as `Authorization: Bearer …`.
+- On first sign-in a Clerk user is linked to the existing user with the same email, or a new user is created.
+- `USE_MOCK=true` skips auth entirely and acts as the seed user.

@@ -4,13 +4,15 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { UserButton } from '@clerk/react';
 import { Button } from '@/components/ui/button';
+import { authEnabled } from '@/lib/auth';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { toggleSidebar, openEventModal, setCalendarView } from '@/store/uiSlice';
 
 /**
  * Top header bar — mobile-first.
- * Contains: hamburger menu, month/year title, view switcher, create button.
+ * Contains: hamburger menu, month/year title, view switcher, create button, user menu.
  */
 export function Header() {
   const dispatch = useAppDispatch();
@@ -120,6 +122,8 @@ export function Header() {
       >
         <Plus className="h-5 w-5" />
       </Button>
+
+      {authEnabled && <UserButton />}
     </header>
   );
 }

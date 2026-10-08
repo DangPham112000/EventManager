@@ -3,7 +3,7 @@ export interface IUser {
   email: string;
   name: string;
   avatar?: string;
-  googleId: string;
+  googleId?: string;
 }
 
 export interface IEvent {
@@ -35,10 +35,9 @@ export interface UpdateEventInput {
 }
 
 export interface IDataSource {
-  getUser(): Promise<IUser | null>;
   getEvents(): Promise<IEvent[]>;
   getEvent(id: string): Promise<IEvent | null>;
-  createEvent(input: CreateEventInput): Promise<IEvent>;
+  createEvent(input: CreateEventInput, creator: IUser): Promise<IEvent>;
   updateEvent(id: string, input: UpdateEventInput): Promise<IEvent | null>;
   deleteEvent(id: string): Promise<boolean>;
 }
