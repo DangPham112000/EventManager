@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { getDataSource } from '../data/index.js';
+import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js';
 import type { CreateEventInput, IUser, UpdateEventInput } from '../data/types.js';
 
 export interface Context {
@@ -26,6 +27,8 @@ export const resolvers = {
       requireUser(ctx);
       return getDataSource().getEvent(id);
     },
+
+    apiKeys: async (_: unknown, __: unknown, ctx: Context) => listApiKeys(requireUser(ctx)),
   },
 
   Mutation: {
@@ -49,5 +52,11 @@ export const resolvers = {
       requireUser(ctx);
       return getDataSource().deleteEvent(id);
     },
+
+    createApiKey: async (_: unknown, { name }: { name: string }, ctx: Context) =>
+      createApiKey(requireUser(ctx), name),
+
+    revokeApiKey: async (_: unknown, { id }: { id: string }, ctx: Context) =>
+      revokeApiKey(requireUser(ctx), id),
   },
 };

@@ -17,6 +17,17 @@ export const mockDataSource: IDataSource = {
     return events.find((e) => e.id === id) ?? null;
   },
 
+  async getUserEvents(userId: string, from?: Date, to?: Date) {
+    return events
+      .filter(
+        (e) =>
+          (e.creator.id === userId || e.attendees.some((a) => a.id === userId)) &&
+          (!to || new Date(e.startTime) < to) &&
+          (!from || new Date(e.endTime) > from),
+      )
+      .sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
+  },
+
   async createEvent(input: CreateEventInput, creator: IUser) {
     const newEvent: IEvent = {
       id: `evt-${String(nextId++).padStart(3, '0')}`,

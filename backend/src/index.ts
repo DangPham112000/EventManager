@@ -9,6 +9,7 @@ import { resolvers, type Context } from './graphql/resolvers.js';
 import { getUserFromAuthHeader } from './auth.js';
 import { SEED_USER } from './data/mockData.js';
 import { User } from './models/User.js';
+import { handleMcpNotAllowed, handleMcpPost } from './mcp/http.js';
 
 dotenv.config();
 
@@ -57,9 +58,15 @@ async function startServer() {
     }),
   );
 
+  // MCP endpoint for AI agents, authenticated with personal API keys.
+  app.post('/mcp', cors<cors.CorsRequest>(), express.json({ limit: '1mb' }), handleMcpPost);
+  app.get('/mcp', handleMcpNotAllowed);
+  app.delete('/mcp', handleMcpNotAllowed);
+
   app.listen(port, () => {
     const mode = useMock ? '🧪 MOCK' : '🗄️  DB';
     console.log(`Server ready at http://localhost:${port}/graphql [${mode}]`);
+    console.log(`MCP endpoint at http://localhost:${port}/mcp`);
   });
 }
 

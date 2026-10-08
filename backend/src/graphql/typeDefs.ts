@@ -36,15 +36,34 @@ export const typeDefs = `#graphql
     location: String
   }
 
+  "Personal key an AI agent uses to call the MCP endpoint."
+  type ApiKey {
+    id: ID!
+    name: String!
+    "First characters of the key, for telling keys apart."
+    prefix: String!
+    createdAt: String!
+    lastUsedAt: String
+  }
+
+  type CreatedApiKey {
+    "The full key. Shown only once."
+    key: String!
+    apiKey: ApiKey!
+  }
+
   type Query {
     me: User
     getEvents: [Event!]!
     getEvent(id: ID!): Event
+    apiKeys: [ApiKey!]!
   }
 
   type Mutation {
     createEvent(input: CreateEventInput!): Event!
     updateEvent(id: ID!, input: UpdateEventInput!): Event!
     deleteEvent(id: ID!): Boolean!
+    createApiKey(name: String!): CreatedApiKey!
+    revokeApiKey(id: ID!): Boolean!
   }
 `;

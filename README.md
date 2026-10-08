@@ -54,3 +54,19 @@ Sign-in uses [Clerk](https://clerk.com) (enable Google under *User & authenticat
 - **Backend:** `CLERK_SECRET_KEY` in `backend/.env` (dev) or the `CLERK_SECRET_KEY` GitHub Actions **secret** (production). It verifies the session token sent as `Authorization: Bearer …`.
 - On first sign-in a Clerk user is linked to the existing user with the same email, or a new user is created.
 - `USE_MOCK=true` skips auth entirely and acts as the seed user.
+
+## AI agents (MCP)
+
+The backend serves an [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` (Streamable HTTP, stateless), so AI agents can manage a user's calendar from a prompt.
+
+1. Sign in and open **AI agents** in the sidebar, then create an API key. Keys start with `emk_`, are shown once, and only their SHA-256 hash is stored.
+2. Add the server to the agent, sending the key as `Authorization: Bearer emk_...`:
+   ```bash
+   claude mcp add --transport http event-manager https://events.dantepham.site/mcp \
+     --header "Authorization: Bearer emk_..."
+   ```
+   Clients that cannot set headers (claude.ai or ChatGPT custom connectors) can use `https://events.dantepham.site/mcp?key=emk_...` instead.
+
+Tools: `list_events`, `get_event`, `check_availability`, `find_conflicts`, `create_event`, `update_event`, `delete_event`. Create and update refuse a time that overlaps the user's other events and list the conflicts, unless the agent passes `allowConflict: true` after asking the user. Only the event creator can update or delete it.
+
+`MCP_TIMEZONE` (default `Asia/Ho_Chi_Minh`) sets the timezone the agent is told to assume and the one used for readable times in tool results. In mock mode (`USE_MOCK=true`) `/mcp` needs no key and acts as the seed user.

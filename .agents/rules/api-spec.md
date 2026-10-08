@@ -31,6 +31,7 @@
 | `me`                   | `User`       | Get current logged-in user profile   |
 | `getEvents`            | `[Event!]!`  | Get a list of all events             |
 | `getEvent(id: ID!)`    | `Event`      | Get details of a specific event      |
+| `apiKeys`              | `[ApiKey!]!` | Current user's MCP API keys          |
 
 ## Mutations
 
@@ -42,3 +43,10 @@
 | `deleteEvent(id: ID!)`                       | `Boolean!`     | Delete an event                      |
 | `joinEvent(eventId: ID!)`                    | `Event!`       | Join/participate in an event         |
 | `leaveEvent(eventId: ID!)`                   | `Event!`       | Leave an event                       |
+| `createApiKey(name: String!)`                | `CreatedApiKey!` | Create an MCP API key (raw key returned once) |
+| `revokeApiKey(id: ID!)`                      | `Boolean!`     | Revoke one of the user's API keys    |
+
+## MCP endpoint
+
+`POST /mcp` (Streamable HTTP, stateless), authenticated with `Authorization: Bearer emk_...` or `?key=emk_...`.
+Tools: `list_events`, `get_event`, `check_availability`, `find_conflicts`, `create_event`, `update_event`, `delete_event`.
