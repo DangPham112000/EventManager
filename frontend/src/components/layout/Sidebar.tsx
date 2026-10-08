@@ -1,4 +1,4 @@
-import { Calendar, LayoutDashboard } from 'lucide-react';
+import { Bot, Calendar, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
@@ -73,6 +73,13 @@ export function Sidebar() {
           >
             <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
             Dashboard
+          </button>
+          <button
+            onClick={() => handleNavigate('/ai-agents')}
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
+          >
+            <Bot className="h-4 w-4 text-muted-foreground" />
+            AI agents
           </button>
         </nav>
 

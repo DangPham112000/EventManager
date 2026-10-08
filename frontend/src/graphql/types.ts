@@ -47,3 +47,19 @@ export interface UpdateEventData {
 export interface DeleteEventData {
   deleteEvent: boolean;
 }
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  createdAt: string;
+  lastUsedAt?: string | null;
+}
+
+export interface ApiKeysData {
+  apiKeys: ApiKey[];
+}
+
+export interface CreateApiKeyData {
+  createApiKey: { key: string; apiKey: ApiKey };
+}

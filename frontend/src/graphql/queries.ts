@@ -59,3 +59,15 @@ export const GET_EVENT = gql`
     }
   }
 `;
+
+export const GET_API_KEYS = gql`
+  query ApiKeys {
+    apiKeys {
+      id
+      name
+      prefix
+      createdAt
+      lastUsedAt
+    }
+  }
+`;

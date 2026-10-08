@@ -4,6 +4,7 @@ import { ClerkWithRouter } from './components/auth/ClerkWithRouter';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { Dashboard } from './pages/Dashboard';
 import { EventDetail } from './pages/EventDetail';
+import { AiAgents } from './pages/AiAgents';
 import { SignInPage } from './pages/SignInPage';
 import { authEnabled } from './lib/auth';
 
@@ -27,6 +28,7 @@ function App() {
           >
             <Route path="/" element={<Dashboard />} />
             <Route path="/events/:id" element={<EventDetail />} />
+            <Route path="/ai-agents" element={<AiAgents />} />
           </Route>
         </Routes>
       </ClerkWithRouter>

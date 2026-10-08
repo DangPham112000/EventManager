@@ -1,4 +1,5 @@
 import type { IDataSource, IUser, IEvent, CreateEventInput, UpdateEventInput } from './types.js';
+import mongoose from 'mongoose';
 import { Event } from '../models/Event.js';
 
 /**
@@ -15,9 +16,22 @@ export const dbDataSource: IDataSource = {
   },
 
   async getEvent(id: string): Promise<IEvent | null> {
+    if (!mongoose.isValidObjectId(id)) return null;
     const event = await Event.findById(id).populate('creator').populate('attendees');
     if (!event) return null;
     return mapEvent(event);
+  },
+
+  async getUserEvents(userId: string, from?: Date, to?: Date): Promise<IEvent[]> {
+    const events = await Event.find({
+      $or: [{ creator: userId }, { attendees: userId }],
+      ...(to && { startTime: { $lt: to } }),
+      ...(from && { endTime: { $gt: from } }),
+    })
+      .sort({ startTime: 1 })
+      .populate('creator')
+      .populate('attendees');
+    return events.map(mapEvent);
   },
 
   async createEvent(input: CreateEventInput, creator: IUser): Promise<IEvent> {
@@ -32,6 +46,7 @@ export const dbDataSource: IDataSource = {
   },
 
   async updateEvent(id: string, input: UpdateEventInput): Promise<IEvent | null> {
+    if (!mongoose.isValidObjectId(id)) return null;
     const event = await Event.findByIdAndUpdate(id, input, { new: true })
       .populate('creator')
       .populate('attendees');
@@ -40,6 +55,7 @@ export const dbDataSource: IDataSource = {
   },
 
   async deleteEvent(id: string): Promise<boolean> {
+    if (!mongoose.isValidObjectId(id)) return false;
     const result = await Event.findByIdAndDelete(id);
     return result !== null;
   },

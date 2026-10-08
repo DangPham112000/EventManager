@@ -47,3 +47,24 @@ export const DELETE_EVENT = gql`
     deleteEvent(id: $id)
   }
 `;
+
+export const CREATE_API_KEY = gql`
+  mutation CreateApiKey($name: String!) {
+    createApiKey(name: $name) {
+      key
+      apiKey {
+        id
+        name
+        prefix
+        createdAt
+        lastUsedAt
+      }
+    }
+  }
+`;
+
+export const REVOKE_API_KEY = gql`
+  mutation RevokeApiKey($id: ID!) {
+    revokeApiKey(id: $id)
+  }
+`;
