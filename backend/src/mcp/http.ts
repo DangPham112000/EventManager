@@ -1,17 +1,26 @@
 import type { Request, Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { getUserFromApiKey } from '../apiKeys.js';
+import { API_KEY_PREFIX, getUserFromApiKey } from '../apiKeys.js';
+import { getUserFromOAuthToken } from '../auth.js';
 import { SEED_USER } from '../data/mockData.js';
 import { createMcpServer } from './server.js';
+import { oauthIssuer, resourceMetadataUrl } from './oauth.js';
 
 /**
- * The key comes from "Authorization: Bearer emk_..." or, for clients that
- * cannot send headers (claude.ai / ChatGPT custom connectors), "?key=emk_...".
+ * The credential is either a personal API key ("Authorization: Bearer emk_..."
+ * or "?key=emk_..." for clients that cannot send headers), or a Clerk OAuth
+ * access token the client got by signing the user in (see oauth.ts).
  */
-function readKey(req: Request): string | undefined {
+function readCredential(req: Request): string | undefined {
   const header = req.headers.authorization;
   if (header?.startsWith('Bearer ')) return header.slice('Bearer '.length).trim();
   return typeof req.query.key === 'string' ? req.query.key : undefined;
+}
+
+async function authenticate(credential: string | undefined) {
+  if (!credential) return null;
+  if (credential.startsWith(API_KEY_PREFIX)) return getUserFromApiKey(credential);
+  return getUserFromOAuthToken(credential);
 }
 
 function rpcError(res: Response, status: number, message: string) {
@@ -21,9 +30,13 @@ function rpcError(res: Response, status: number, message: string) {
 /** POST /mcp — stateless Streamable HTTP: a fresh server per request. */
 export async function handleMcpPost(req: Request, res: Response) {
   // Mock mode has no keys to check: everyone is the seed user, like /graphql.
-  const user = process.env.USE_MOCK === 'true' ? SEED_USER : await getUserFromApiKey(readKey(req));
+  const user = process.env.USE_MOCK === 'true' ? SEED_USER : await authenticate(readCredential(req));
   if (!user) {
-    rpcError(res, 401, 'Missing or invalid API key. Create one in Event Manager → AI agents.');
+    // Points OAuth-capable clients at the sign-in flow.
+    if (oauthIssuer) {
+      res.set('WWW-Authenticate', `Bearer resource_metadata="${resourceMetadataUrl(req)}"`);
+    }
+    rpcError(res, 401, 'Sign in, or use an API key from Event Manager → AI agents.');
     return;
   }
 

@@ -23,6 +23,9 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017/event-manager
       - CLERK_SECRET_KEY=${CLERK_SECRET_KEY:-}
       - CLERK_AUTHORIZED_PARTIES=${CLERK_AUTHORIZED_PARTIES:-https://events.dantepham.site}
+      # Lets AI agents sign in to /mcp with OAuth through Clerk.
+      - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY:-}
+      - PUBLIC_URL=${PUBLIC_URL:-https://events.dantepham.site}
     depends_on:
       - mongodb
     # No published port: the frontend nginx reaches it over the internal network.
