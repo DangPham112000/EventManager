@@ -5,7 +5,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { typeDefs } from './graphql/typeDefs.js';
-import { resolvers } from './graphql/resolvers.js';
+import { resolvers, type Context } from './graphql/resolvers.js';
+import { getUserFromAuthHeader } from './auth.js';
+import { SEED_USER } from './data/mockData.js';
+import { User } from './models/User.js';
 
 dotenv.config();
 
@@ -25,9 +28,16 @@ async function startServer() {
     }
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
+    // Replaces the old non-sparse unique googleId index, so users who sign in
+    // without Google (no googleId) do not collide on null.
+    await User.syncIndexes();
   }
 
-  const server = new ApolloServer({
+  if (!useMock && !process.env.CLERK_SECRET_KEY) {
+    console.warn('⚠️  CLERK_SECRET_KEY not set — every request will be unauthenticated.');
+  }
+
+  const server = new ApolloServer<Context>({
     typeDefs,
     resolvers,
   });
@@ -39,9 +49,10 @@ async function startServer() {
     cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }: { req: any }) => {
-        // TODO: Implement authentication context (multi-user phase)
-        return { user: null };
+      context: async ({ req }): Promise<Context> => {
+        // Mock mode has no Clerk: everyone is the seed user.
+        if (useMock) return { user: SEED_USER };
+        return { user: await getUserFromAuthHeader(req.headers.authorization) };
       },
     }),
   );

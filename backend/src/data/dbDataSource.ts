@@ -1,5 +1,4 @@
 import type { IDataSource, IUser, IEvent, CreateEventInput, UpdateEventInput } from './types.js';
-import { User } from '../models/User.js';
 import { Event } from '../models/Event.js';
 
 /**
@@ -10,19 +9,6 @@ import { Event } from '../models/Event.js';
  * For now, these are typed stubs matching the IDataSource interface.
  */
 export const dbDataSource: IDataSource = {
-  async getUser(): Promise<IUser | null> {
-    // In single-user mode, return the first (seeded) user
-    const user = await User.findOne();
-    if (!user) return null;
-    return {
-      id: user._id.toString(),
-      email: user.email,
-      name: user.name,
-      avatar: user.avatar || undefined,
-      googleId: user.googleId,
-    };
-  },
-
   async getEvents(): Promise<IEvent[]> {
     const events = await Event.find().populate('creator').populate('attendees');
     return events.map(mapEvent);
@@ -34,15 +20,11 @@ export const dbDataSource: IDataSource = {
     return mapEvent(event);
   },
 
-  async createEvent(input: CreateEventInput): Promise<IEvent> {
-    // In single-user mode, use the first user as creator
-    const user = await User.findOne();
-    if (!user) throw new Error('No user found. Seed the database first.');
-
+  async createEvent(input: CreateEventInput, creator: IUser): Promise<IEvent> {
     const event = await Event.create({
       ...input,
-      creator: user._id,
-      attendees: [user._id],
+      creator: creator.id,
+      attendees: [creator.id],
     });
 
     const populated = await event.populate(['creator', 'attendees']);

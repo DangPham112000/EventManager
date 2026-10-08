@@ -1,5 +1,5 @@
-import type { IDataSource, IEvent, CreateEventInput, UpdateEventInput } from './types.js';
-import { SEED_USER, SEED_EVENTS } from './mockData.js';
+import type { IDataSource, IEvent, IUser, CreateEventInput, UpdateEventInput } from './types.js';
+import { SEED_EVENTS } from './mockData.js';
 
 let events: IEvent[] = [...SEED_EVENTS];
 let nextId = events.length + 1;
@@ -9,10 +9,6 @@ let nextId = events.length + 1;
  * All data lives in arrays and resets on server restart.
  */
 export const mockDataSource: IDataSource = {
-  async getUser() {
-    return SEED_USER;
-  },
-
   async getEvents() {
     return events;
   },
@@ -21,7 +17,7 @@ export const mockDataSource: IDataSource = {
     return events.find((e) => e.id === id) ?? null;
   },
 
-  async createEvent(input: CreateEventInput) {
+  async createEvent(input: CreateEventInput, creator: IUser) {
     const newEvent: IEvent = {
       id: `evt-${String(nextId++).padStart(3, '0')}`,
       title: input.title,
@@ -29,8 +25,8 @@ export const mockDataSource: IDataSource = {
       startTime: input.startTime,
       endTime: input.endTime,
       location: input.location,
-      creator: SEED_USER,
-      attendees: [SEED_USER],
+      creator,
+      attendees: [creator],
     };
     events.push(newEvent);
     return newEvent;
