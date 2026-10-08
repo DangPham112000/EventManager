@@ -59,6 +59,10 @@ Sign-in uses [Clerk](https://clerk.com) (enable Google under *User & authenticat
 
 The backend serves an [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` (Streamable HTTP, stateless), so AI agents can manage a user's calendar from a prompt.
 
+**Sign in with OAuth (easiest).** In Gemini, claude.ai, ChatGPT or Claude Desktop, add a custom connector with the URL `https://events.dantepham.site/mcp`. The client finds Clerk through `/.well-known/oauth-protected-resource/mcp`, registers itself, and sends the user through Clerk sign-in and consent; `/mcp` then accepts the Clerk OAuth access token. This needs **Dynamic client registration** turned on in the Clerk dashboard (Configure → OAuth applications) and `CLERK_PUBLISHABLE_KEY` set on the backend.
+
+**API key (for clients that cannot sign in, e.g. Claude Code or Cursor).**
+
 1. Sign in and open **AI agents** in the sidebar, then create an API key. Keys start with `emk_`, are shown once, and only their SHA-256 hash is stored.
 2. Add the server to the agent, sending the key as `Authorization: Bearer emk_...`:
    ```bash

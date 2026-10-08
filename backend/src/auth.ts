@@ -40,6 +40,33 @@ export async function getUserFromAuthHeader(header: string | undefined): Promise
     return null;
   }
 
+  return getUserByClerkId(clerkId);
+}
+
+/**
+ * Resolve the signed-in user from a Clerk OAuth access token, which AI agents
+ * get by signing in through Clerk (see mcp/oauth.ts). Returns null when the
+ * token is invalid, expired or revoked.
+ */
+export async function getUserFromOAuthToken(token: string): Promise<IUser | null> {
+  if (!clerk) return null;
+  let clerkId: string;
+  try {
+    const accessToken = await clerk.idPOAuthAccessToken.verify(token);
+    if (accessToken.revoked || accessToken.expired) return null;
+    clerkId = accessToken.subject;
+  } catch {
+    return null;
+  }
+  return getUserByClerkId(clerkId);
+}
+
+/**
+ * Find the Mongo user for a Clerk user id. The first time, link to an existing
+ * Mongo user with the same email or create one.
+ */
+async function getUserByClerkId(clerkId: string): Promise<IUser | null> {
+  if (!clerk) return null;
   const existing = await User.findOne({ clerkId });
   if (existing) return toUser(existing);
 

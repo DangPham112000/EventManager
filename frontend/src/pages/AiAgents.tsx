@@ -88,6 +88,21 @@ export function AiAgents() {
           </p>
         </div>
 
+        <div className="space-y-2 rounded-xl border border-border p-3">
+          <Label>Easiest: sign in from your AI app</Label>
+          <p className="text-sm text-muted-foreground">
+            In Gemini, claude.ai, ChatGPT or Claude Desktop, add a custom connector with this URL. When
+            it asks, sign in with your Event Manager account and allow access. No key needed.
+          </p>
+          <CopyBlock label="MCP server URL" text={mcpUrl} />
+        </div>
+
+        <Separator />
+
+        <p className="text-sm text-muted-foreground">
+          For tools that cannot sign in (Claude Code, Cursor, scripts), use an API key instead.
+        </p>
+
         <form onSubmit={handleCreate} className="space-y-2">
           <Label htmlFor="key-name">1. Create an API key</Label>
           <div className="flex gap-2">
@@ -115,7 +130,7 @@ export function AiAgents() {
           <Label>2. Add the server to your AI agent</Label>
           <CopyBlock label="Claude Code" text={claudeCode} />
           <CopyBlock label="Cursor, Windsurf, VS Code and other JSON configs" text={jsonConfig} />
-          <CopyBlock label="claude.ai or ChatGPT custom connector (URL only)" text={urlWithKey} />
+          <CopyBlock label="Clients that only take a URL" text={urlWithKey} />
           <p className="text-xs text-muted-foreground">
             The URL-only form puts the key in the address, so it can end up in logs. Prefer the
             header form when your client supports it, and revoke a key you no longer use.

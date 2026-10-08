@@ -10,6 +10,7 @@ import { getUserFromAuthHeader } from './auth.js';
 import { SEED_USER } from './data/mockData.js';
 import { User } from './models/User.js';
 import { handleMcpNotAllowed, handleMcpPost } from './mcp/http.js';
+import { authorizationServerMetadata, oauthIssuer, protectedResourceMetadata } from './mcp/oauth.js';
 
 dotenv.config();
 
@@ -38,6 +39,10 @@ async function startServer() {
     console.warn('⚠️  CLERK_SECRET_KEY not set — every request will be unauthenticated.');
   }
 
+  if (!useMock && !oauthIssuer) {
+    console.warn('⚠️  CLERK_PUBLISHABLE_KEY not set — AI agents can only connect to /mcp with API keys.');
+  }
+
   const server = new ApolloServer<Context>({
     typeDefs,
     resolvers,
@@ -62,6 +67,12 @@ async function startServer() {
   app.post('/mcp', cors<cors.CorsRequest>(), express.json({ limit: '1mb' }), handleMcpPost);
   app.get('/mcp', handleMcpNotAllowed);
   app.delete('/mcp', handleMcpNotAllowed);
+  // OAuth discovery, so agents can sign in with the user's Clerk account.
+  app.get(
+    ['/.well-known/oauth-protected-resource', '/.well-known/oauth-protected-resource/mcp'],
+    protectedResourceMetadata,
+  );
+  app.get('/.well-known/oauth-authorization-server', authorizationServerMetadata);
 
   app.listen(port, () => {
     const mode = useMock ? '🧪 MOCK' : '🗄️  DB';
