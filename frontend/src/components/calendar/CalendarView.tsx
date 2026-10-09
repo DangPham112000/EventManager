@@ -128,6 +128,11 @@ export function CalendarView({ events }: CalendarViewProps) {
         allDaySlot={false}
         // Mobile touch scrolling
         dayHeaderFormat={{ weekday: 'short' }}
+        views={{
+          // Week columns need the date too, or the header is just "MON TUE…"
+          timeGridWeek: { dayHeaderFormat: { weekday: 'short', day: 'numeric' } },
+          timeGridDay: { dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' } },
+        }}
       />
     </div>
   );

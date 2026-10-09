@@ -24,6 +24,11 @@ export function Header() {
     month: 'long',
     year: 'numeric',
   });
+  // Short form for narrow phones (e.g. iPhone 11 Pro, 375px wide)
+  const monthYearShort = displayDate.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  });
 
   const viewLabels: Record<string, string> = {
     dayGridMonth: 'Month',
@@ -35,12 +40,12 @@ export function Header() {
   const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'] as const;
 
   return (
-    <header className="flex items-center gap-2 border-b border-border bg-background/80 px-3 py-2 backdrop-blur-md sm:px-4">
+    <header className="flex w-full min-w-0 items-center gap-1 border-b border-border bg-background/80 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.25rem,env(safe-area-inset-left))] backdrop-blur-md sm:gap-2 sm:px-4">
       {/* Hamburger — opens sheet sidebar */}
       <Button
         variant="ghost"
         size="icon"
-        className="touch-target no-select"
+        className="touch-target no-select shrink-0"
         onClick={() => dispatch(toggleSidebar())}
         aria-label="Open menu"
       >
@@ -48,11 +53,11 @@ export function Header() {
       </Button>
 
       {/* Month/Year display + nav arrows */}
-      <div className="flex items-center gap-1">
+      <div className="flex min-w-0 items-center sm:gap-1">
         <Button
           variant="ghost"
           size="icon"
-          className="touch-target no-select h-8 w-8"
+          className="no-select h-11 w-8 shrink-0 sm:touch-target"
           onClick={() => {
             // Calendar component handles navigation via ref
             const event = new CustomEvent('calendar-nav', { detail: 'prev' });
@@ -62,13 +67,14 @@ export function Header() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h1 className="min-w-[120px] text-center text-sm font-semibold sm:text-base">
-          {monthYear}
+        <h1 className="min-w-0 truncate text-center text-sm font-semibold sm:min-w-[120px] sm:text-base">
+          <span className="sm:hidden">{monthYearShort}</span>
+          <span className="hidden sm:inline">{monthYear}</span>
         </h1>
         <Button
           variant="ghost"
           size="icon"
-          className="touch-target no-select h-8 w-8"
+          className="no-select h-11 w-8 shrink-0 sm:touch-target"
           onClick={() => {
             const event = new CustomEvent('calendar-nav', { detail: 'next' });
             window.dispatchEvent(event);
@@ -100,7 +106,7 @@ export function Header() {
       </div>
 
       {/* Mobile: compact view switcher (just current + dropdown) */}
-      <div className="flex items-center sm:hidden">
+      <div className="flex shrink-0 items-center sm:hidden">
         <button
           onClick={() => {
             const currentIndex = views.indexOf(calendarView);
@@ -116,14 +122,18 @@ export function Header() {
       {/* Create event button */}
       <Button
         size="icon"
-        className="touch-target no-select h-9 w-9 rounded-full"
+        className="no-select h-9 w-9 shrink-0 rounded-full"
         onClick={() => dispatch(openEventModal())}
         aria-label="Create event"
       >
         <Plus className="h-5 w-5" />
       </Button>
 
-      {authEnabled && <UserButton />}
+      {authEnabled && (
+        <div className="flex shrink-0 items-center">
+          <UserButton />
+        </div>
+      )}
     </header>
   );
 }
