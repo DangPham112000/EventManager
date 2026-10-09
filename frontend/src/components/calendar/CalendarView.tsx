@@ -106,6 +106,10 @@ export function CalendarView({ events }: CalendarViewProps) {
         selectable={true}
         selectMirror={true}
         dayMaxEvents={3}
+        // Render single-day timed events as filled pills in month view,
+        // matching multi-day events (default 'auto' shows dot + text only).
+        // Set globally: FullCalendar ignores eventDisplay in per-view options.
+        eventDisplay="block"
         weekends={true}
         nowIndicator={true}
         eventClick={handleEventClick}
