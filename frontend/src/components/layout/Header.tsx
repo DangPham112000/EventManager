@@ -34,10 +34,13 @@ export function Header() {
     dayGridMonth: 'Month',
     timeGridWeek: 'Week',
     timeGridDay: 'Day',
-    listMonth: 'List',
+    listUpcoming: 'List',
   };
 
-  const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listMonth'] as const;
+  // The upcoming list is not tied to a date range, so it has no prev/next
+  const isUpcomingList = calendarView === 'listUpcoming';
+
+  const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listUpcoming'] as const;
 
   return (
     <header className="flex w-full min-w-0 items-center gap-1 border-b border-border bg-background/80 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.25rem,env(safe-area-inset-left))] backdrop-blur-md sm:gap-2 sm:px-4">
@@ -54,6 +57,7 @@ export function Header() {
 
       {/* Month/Year display + nav arrows */}
       <div className="flex min-w-0 items-center sm:gap-1">
+        {!isUpcomingList && (
         <Button
           variant="ghost"
           size="icon"
@@ -67,10 +71,18 @@ export function Header() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
+        )}
         <h1 className="min-w-0 truncate text-center text-sm font-semibold sm:min-w-[120px] sm:text-base">
-          <span className="sm:hidden">{monthYearShort}</span>
-          <span className="hidden sm:inline">{monthYear}</span>
+          {isUpcomingList ? (
+            'Upcoming'
+          ) : (
+            <>
+              <span className="sm:hidden">{monthYearShort}</span>
+              <span className="hidden sm:inline">{monthYear}</span>
+            </>
+          )}
         </h1>
+        {!isUpcomingList && (
         <Button
           variant="ghost"
           size="icon"
@@ -83,6 +95,7 @@ export function Header() {
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
+        )}
       </div>
 
       {/* Spacer */}
