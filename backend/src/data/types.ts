@@ -8,6 +8,12 @@ export interface IUser {
   googleId?: string;
 }
 
+/** One user's participation in an event. */
+export interface IAttendee {
+  user: IUser;
+  participation: Participation;
+}
+
 export interface IEvent {
   id: string;
   title: string;
@@ -15,9 +21,11 @@ export interface IEvent {
   startTime: string;
   endTime: string;
   location?: string;
-  participation: Participation;
   creator: IUser;
-  attendees: IUser[];
+  /** Everyone taking part, including the creator, each with their own participation. */
+  attendees: IAttendee[];
+  /** Secret that lets users who are not attendees open the event, to join it. */
+  shareToken: string;
   googleEventId?: string;
 }
 
@@ -27,7 +35,7 @@ export interface CreateEventInput {
   startTime: string;
   endTime: string;
   location?: string;
-  /** Defaults to JOINED. */
+  /** The creator's participation. Defaults to JOINED. */
   participation?: Participation;
 }
 
@@ -37,7 +45,6 @@ export interface UpdateEventInput {
   startTime?: string;
   endTime?: string;
   location?: string;
-  participation?: Participation;
 }
 
 export interface IDataSource {
@@ -50,4 +57,8 @@ export interface IDataSource {
   createEvent(input: CreateEventInput, creator: IUser): Promise<IEvent>;
   updateEvent(id: string, input: UpdateEventInput): Promise<IEvent | null>;
   deleteEvent(id: string): Promise<boolean>;
+  /** Add the user as an attendee, or change their participation if they already are one. */
+  joinEvent(id: string, user: IUser, participation: Participation): Promise<IEvent | null>;
+  /** Remove the user from the attendees. */
+  leaveEvent(id: string, userId: string): Promise<IEvent | null>;
 }

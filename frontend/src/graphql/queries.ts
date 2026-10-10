@@ -29,17 +29,20 @@ export const GET_EVENTS = gql`
         avatar
       }
       attendees {
-        id
-        name
-        avatar
+        user {
+          id
+          name
+          avatar
+        }
+        participation
       }
     }
   }
 `;
 
 export const GET_EVENT = gql`
-  query GetEvent($id: ID!) {
-    getEvent(id: $id) {
+  query GetEvent($id: ID!, $shareToken: String) {
+    getEvent(id: $id, shareToken: $shareToken) {
       id
       title
       description
@@ -55,11 +58,15 @@ export const GET_EVENT = gql`
         avatar
       }
       attendees {
-        id
-        name
-        email
-        avatar
+        user {
+          id
+          name
+          email
+          avatar
+        }
+        participation
       }
+      shareToken
     }
   }
 `;

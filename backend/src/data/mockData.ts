@@ -12,6 +12,14 @@ export const SEED_USER: IUser = {
   googleId: 'google-mock-001',
 };
 
+/** Another user, so joining and leaving can be tried in mock mode. */
+export const OTHER_USER: IUser = {
+  id: 'user-002',
+  email: 'linh@example.com',
+  name: 'Linh Tran',
+  avatar: undefined,
+};
+
 /**
  * Helper: generate a date relative to today.
  * @param dayOffset - days from today (0 = today)
@@ -37,9 +45,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(0, 9, 0),
     endTime: relativeDate(0, 9, 30),
     location: 'Meeting Room A',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-001',
   },
   {
     id: 'evt-002',
@@ -48,9 +56,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(0, 14, 0),
     endTime: relativeDate(0, 15, 30),
     location: 'Conference Room B',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-002',
   },
   {
     id: 'evt-003',
@@ -59,9 +67,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(1, 12, 0),
     endTime: relativeDate(1, 13, 0),
     location: 'Pho Nguyen Restaurant',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-003',
   },
   {
     id: 'evt-004',
@@ -70,9 +78,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(1, 10, 0),
     endTime: relativeDate(1, 11, 30),
     location: 'Meeting Room A',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-004',
   },
   {
     id: 'evt-005',
@@ -80,9 +88,9 @@ export const SEED_EVENTS: IEvent[] = [
     description: 'Review PRs for the event manager feature.',
     startTime: relativeDate(2, 15, 0),
     endTime: relativeDate(2, 16, 0),
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-005',
   },
   {
     id: 'evt-006',
@@ -91,9 +99,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(2, 18, 0),
     endTime: relativeDate(2, 19, 0),
     location: 'Fitness Center',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-006',
   },
   {
     id: 'evt-007',
@@ -102,9 +110,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(3, 11, 0),
     endTime: relativeDate(3, 12, 0),
     location: 'Main Auditorium',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-007',
   },
   {
     id: 'evt-008',
@@ -112,9 +120,9 @@ export const SEED_EVENTS: IEvent[] = [
     description: 'Monthly check-in. Bring career development topics.',
     startTime: relativeDate(3, 16, 0),
     endTime: relativeDate(3, 16, 30),
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-008',
   },
   {
     id: 'evt-009',
@@ -123,9 +131,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(4, 14, 0),
     endTime: relativeDate(4, 15, 0),
     location: 'Online — Google Meet',
-    participation: 'INTERESTED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'INTERESTED' }],
+    shareToken: 'share-evt-009',
   },
   {
     id: 'evt-010',
@@ -134,9 +142,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(5, 17, 0),
     endTime: relativeDate(5, 19, 0),
     location: 'Rooftop Bar',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-010',
   },
   {
     id: 'evt-011',
@@ -145,9 +153,9 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(6, 9, 0),
     endTime: relativeDate(6, 18, 0),
     location: 'Co-working Space',
-    participation: 'INTERESTED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'INTERESTED' }],
+    shareToken: 'share-evt-011',
   },
   {
     id: 'evt-012',
@@ -156,8 +164,20 @@ export const SEED_EVENTS: IEvent[] = [
     startTime: relativeDate(7, 8, 0),
     endTime: relativeDate(7, 9, 0),
     location: 'Dental Clinic',
-    participation: 'JOINED',
     creator: SEED_USER,
-    attendees: [SEED_USER],
+    attendees: [{ user: SEED_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-012',
+  },
+  {
+    // Not in the seed user's calendar; open /events/evt-013?share=share-evt-013 to join it.
+    id: 'evt-013',
+    title: 'Board Game Night',
+    description: 'Bring your favourite game.',
+    startTime: relativeDate(4, 19, 0),
+    endTime: relativeDate(4, 22, 0),
+    location: 'Linh\'s place',
+    creator: OTHER_USER,
+    attendees: [{ user: OTHER_USER, participation: 'JOINED' }],
+    shareToken: 'share-evt-013',
   },
 ];

@@ -14,9 +14,13 @@ export const CREATE_EVENT = gql`
         id
         name
       }
+      isOwner
       attendees {
-        id
-        name
+        user {
+          id
+          name
+        }
+        participation
       }
     }
   }
@@ -36,9 +40,52 @@ export const UPDATE_EVENT = gql`
         id
         name
       }
+      isOwner
       attendees {
-        id
-        name
+        user {
+          id
+          name
+        }
+        participation
+      }
+    }
+  }
+`;
+
+// Both return the fields that change when the user joins or leaves, so the cached event stays current.
+export const JOIN_EVENT = gql`
+  mutation JoinEvent($eventId: ID!, $participation: Participation, $shareToken: String) {
+    joinEvent(eventId: $eventId, participation: $participation, shareToken: $shareToken) {
+      id
+      participation
+      shareToken
+      attendees {
+        user {
+          id
+          name
+          email
+          avatar
+        }
+        participation
+      }
+    }
+  }
+`;
+
+export const LEAVE_EVENT = gql`
+  mutation LeaveEvent($eventId: ID!) {
+    leaveEvent(eventId: $eventId) {
+      id
+      participation
+      shareToken
+      attendees {
+        user {
+          id
+          name
+          email
+          avatar
+        }
+        participation
       }
     }
   }
