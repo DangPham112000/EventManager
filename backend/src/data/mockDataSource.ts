@@ -9,10 +9,6 @@ let nextId = events.length + 1;
  * All data lives in arrays and resets on server restart.
  */
 export const mockDataSource: IDataSource = {
-  async getEvents() {
-    return events;
-  },
-
   async getEvent(id: string) {
     return events.find((e) => e.id === id) ?? null;
   },

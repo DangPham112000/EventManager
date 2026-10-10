@@ -99,27 +99,32 @@ export function EventDetail() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <span className="flex-1 text-sm font-medium">Event Details</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="touch-target"
-          onClick={handleEdit}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="touch-target text-destructive"
-          onClick={handleDelete}
-          disabled={deleting}
-        >
-          {deleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </Button>
+        {/* Only the creator can edit or delete */}
+        {event.isOwner && (
+          <>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="touch-target"
+              onClick={handleEdit}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="touch-target text-destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Content */}

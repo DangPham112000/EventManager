@@ -10,11 +10,6 @@ import { Event } from '../models/Event.js';
  * For now, these are typed stubs matching the IDataSource interface.
  */
 export const dbDataSource: IDataSource = {
-  async getEvents(): Promise<IEvent[]> {
-    const events = await Event.find().populate('creator').populate('attendees');
-    return events.map(mapEvent);
-  },
-
   async getEvent(id: string): Promise<IEvent | null> {
     if (!mongoose.isValidObjectId(id)) return null;
     const event = await Event.findById(id).populate('creator').populate('attendees');
