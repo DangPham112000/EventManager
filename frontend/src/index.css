@@ -268,6 +268,20 @@
   transition: opacity 0.15s ease, transform 0.1s ease;
 }
 
+/* "Just interested" events: pale fill + dashed outline instead of the solid primary pill */
+.fc .fc-event.fc-event-interested {
+  background-color: color-mix(in oklch, var(--primary) 18%, transparent);
+  border: 1.5px dashed var(--primary) !important;
+  --fc-event-text-color: var(--foreground);
+  color: var(--foreground);
+}
+
+.fc .fc-event.fc-event-interested .fc-event-main,
+.fc .fc-event.fc-event-interested .fc-event-title,
+.fc .fc-event.fc-event-interested .fc-event-time {
+  color: var(--foreground);
+}
+
 @media (hover: hover) {
   .fc .fc-event:hover {
     opacity: 0.85;

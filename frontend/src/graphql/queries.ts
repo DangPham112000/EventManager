@@ -21,6 +21,7 @@ export const GET_EVENTS = gql`
       startTime
       endTime
       location
+      participation
       creator {
         id
         name
@@ -44,6 +45,7 @@ export const GET_EVENT = gql`
       startTime
       endTime
       location
+      participation
       creator {
         id
         name

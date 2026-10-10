@@ -17,6 +17,7 @@ import { GET_EVENTS, GET_EVENT } from '@/graphql/queries';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { closeEventModal } from '@/store/uiSlice';
 import { Loader2 } from 'lucide-react';
+import type { Participation } from '@/graphql/types';
 
 /**
  * Format an ISO string to `YYYY-MM-DDTHH:mm` for datetime-local input.
@@ -51,6 +52,7 @@ interface FormData {
   startTime: string;
   endTime: string;
   location: string;
+  participation: Participation;
 }
 
 /**
@@ -70,6 +72,7 @@ export function EventModal() {
     startTime: defaultStart(),
     endTime: defaultEnd(),
     location: '',
+    participation: 'JOINED',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
@@ -89,6 +92,7 @@ export function EventModal() {
         startTime: toDatetimeLocal(evt.startTime),
         endTime: toDatetimeLocal(evt.endTime),
         location: evt.location || '',
+        participation: evt.participation ?? 'JOINED',
       });
     } else if (!isEditing && isOpen) {
       // Use selected date for new events
@@ -103,6 +107,7 @@ export function EventModal() {
         startTime: start,
         endTime: end,
         location: '',
+        participation: 'JOINED',
       });
     }
     setErrors({});
@@ -139,6 +144,7 @@ export function EventModal() {
       startTime: new Date(form.startTime).toISOString(),
       endTime: new Date(form.endTime).toISOString(),
       location: form.location.trim() || undefined,
+      participation: form.participation,
     };
 
     try {
@@ -153,7 +159,7 @@ export function EventModal() {
     }
   };
 
-  const updateField = (field: keyof FormData, value: string) => {
+  const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -186,6 +192,35 @@ export function EventModal() {
             />
             {errors.title && (
               <p className="text-xs text-destructive">{errors.title}</p>
+            )}
+          </div>
+
+          {/* Participation */}
+          <div className="flex flex-col gap-1.5">
+            <Label>Type</Label>
+            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Event type">
+              {(
+                [
+                  ['JOINED', 'Joined'],
+                  ['INTERESTED', 'Just interested'],
+                ] as const
+              ).map(([value, label]) => (
+                <Button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={form.participation === value}
+                  variant={form.participation === value ? 'default' : 'outline'}
+                  onClick={() => updateField('participation', value)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+            {form.participation === 'INTERESTED' && (
+              <p className="text-xs text-muted-foreground">
+                Interested events are not counted when checking for schedule conflicts.
+              </p>
             )}
           </div>
 

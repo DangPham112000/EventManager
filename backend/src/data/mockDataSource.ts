@@ -36,6 +36,7 @@ export const mockDataSource: IDataSource = {
       startTime: input.startTime,
       endTime: input.endTime,
       location: input.location,
+      participation: input.participation ?? 'JOINED',
       creator,
       attendees: [creator],
     };
@@ -55,6 +56,7 @@ export const mockDataSource: IDataSource = {
       ...(input.startTime !== undefined && { startTime: input.startTime }),
       ...(input.endTime !== undefined && { endTime: input.endTime }),
       ...(input.location !== undefined && { location: input.location }),
+      ...(input.participation !== undefined && { participation: input.participation }),
     };
     events[index] = updated;
     return updated;

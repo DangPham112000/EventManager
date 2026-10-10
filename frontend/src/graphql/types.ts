@@ -2,6 +2,8 @@
  * Shared GraphQL response types for the frontend.
  */
 
+export type Participation = 'JOINED' | 'INTERESTED';
+
 export interface User {
   id: string;
   email: string;
@@ -17,6 +19,7 @@ export interface Event {
   startTime: string;
   endTime: string;
   location?: string;
+  participation: Participation;
   creator: Pick<User, 'id' | 'name' | 'email' | 'avatar'>;
   attendees: Pick<User, 'id' | 'name' | 'email' | 'avatar'>[];
   googleEventId?: string;

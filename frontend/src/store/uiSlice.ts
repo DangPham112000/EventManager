@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+export type ParticipationFilter = 'ALL' | 'JOINED' | 'INTERESTED';
+
 interface UiState {
   isSidebarOpen: boolean;
   isEventModalOpen: boolean;
@@ -7,6 +9,7 @@ interface UiState {
   selectedEventId: string | null;
   calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
   editingEventId: string | null; // non-null when editing existing event in modal
+  participationFilter: ParticipationFilter;
 }
 
 const initialState: UiState = {
@@ -16,6 +19,7 @@ const initialState: UiState = {
   selectedEventId: null,
   calendarView: 'dayGridMonth',
   editingEventId: null,
+  participationFilter: 'ALL',
 };
 
 const uiSlice = createSlice({
@@ -42,6 +46,9 @@ const uiSlice = createSlice({
     setSelectedEventId(state, action: PayloadAction<string | null>) {
       state.selectedEventId = action.payload;
     },
+    setParticipationFilter(state, action: PayloadAction<ParticipationFilter>) {
+      state.participationFilter = action.payload;
+    },
     setCalendarView(state, action: PayloadAction<UiState['calendarView']>) {
       state.calendarView = action.payload;
     },
@@ -56,6 +63,7 @@ export const {
   setSelectedDate,
   setSelectedEventId,
   setCalendarView,
+  setParticipationFilter,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

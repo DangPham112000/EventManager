@@ -20,6 +20,7 @@
 | `startTime`     | `String!`  | ✅       | Start time (ISO 8601)               |
 | `endTime`       | `String!`  | ✅       | End time (ISO 8601)                 |
 | `location`      | `String`   | ❌       | Event location                      |
+| `participation` | `Participation!` | ✅ | `JOINED` (default) or `INTERESTED`; interested events are ignored by conflict checks |
 | `creator`       | `User!`    | ✅       | User who created the event          |
 | `attendees`     | `[User!]!` | ✅       | List of participating users         |
 | `googleEventId` | `String`   | ❌       | Google Calendar sync reference ID   |

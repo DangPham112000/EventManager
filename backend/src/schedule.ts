@@ -10,14 +10,19 @@ export function overlaps(a: TimeRange, b: TimeRange): boolean {
   return Date.parse(a.startTime) < Date.parse(b.endTime) && Date.parse(b.startTime) < Date.parse(a.endTime);
 }
 
-/** Events that overlap the given range, skipping `excludeId` (the event being edited). */
-export function conflictsWith(range: TimeRange, events: IEvent[], excludeId?: string): IEvent[] {
-  return events.filter((e) => e.id !== excludeId && overlaps(range, e));
+/** Events the user is only interested in are not commitments, so they never cause conflicts. */
+export function isCommitted(event: IEvent): boolean {
+  return event.participation !== 'INTERESTED';
 }
 
-/** Every overlapping pair in a schedule. */
+/** Joined events that overlap the given range, skipping `excludeId` (the event being edited). */
+export function conflictsWith(range: TimeRange, events: IEvent[], excludeId?: string): IEvent[] {
+  return events.filter((e) => e.id !== excludeId && isCommitted(e) && overlaps(range, e));
+}
+
+/** Every overlapping pair of joined events in a schedule. */
 export function findConflictPairs(events: IEvent[]): [IEvent, IEvent][] {
-  const sorted = [...events].sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
+  const sorted = events.filter(isCommitted).sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
   const pairs: [IEvent, IEvent][] = [];
   for (let i = 0; i < sorted.length; i++) {
     const end = Date.parse(sorted[i].endTime);

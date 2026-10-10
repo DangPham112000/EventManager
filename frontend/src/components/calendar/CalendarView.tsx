@@ -13,6 +13,7 @@ interface CalendarEvent {
   title: string;
   start: string;
   end: string;
+  classNames?: string[];
   extendedProps?: Record<string, unknown>;
 }
 

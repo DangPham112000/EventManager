@@ -7,6 +7,7 @@ const eventSchema = new mongoose.Schema({
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
   location: { type: String },
+  participation: { type: String, enum: ['JOINED', 'INTERESTED'], default: 'JOINED' },
   creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   attendees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   googleEventId: { type: String },

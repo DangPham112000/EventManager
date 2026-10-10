@@ -8,6 +8,11 @@ export const typeDefs = `#graphql
     googleId: String
   }
 
+  enum Participation {
+    JOINED
+    INTERESTED
+  }
+
   type Event {
     id: ID!
     title: String!
@@ -15,6 +20,7 @@ export const typeDefs = `#graphql
     startTime: String!
     endTime: String!
     location: String
+    participation: Participation!
     creator: User!
     attendees: [User!]!
     googleEventId: String
@@ -26,6 +32,7 @@ export const typeDefs = `#graphql
     startTime: String!
     endTime: String!
     location: String
+    participation: Participation
   }
 
   input UpdateEventInput {
@@ -34,6 +41,7 @@ export const typeDefs = `#graphql
     startTime: String
     endTime: String
     location: String
+    participation: Participation
   }
 
   "Personal key an AI agent uses to call the MCP endpoint."
