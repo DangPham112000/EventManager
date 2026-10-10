@@ -3,7 +3,6 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
 import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedDate, setSelectedEventId, openEventModal } from '@/store/uiSlice';
@@ -22,7 +21,7 @@ interface CalendarViewProps {
 }
 
 /**
- * FullCalendar wrapper with custom theming.
+ * FullCalendar wrapper for the Month/Week/Day views (List is UpcomingList).
  * Listens for calendar-nav CustomEvents from the Header for prev/next navigation.
  */
 export function CalendarView({ events }: CalendarViewProps) {
@@ -98,7 +97,7 @@ export function CalendarView({ events }: CalendarViewProps) {
     <div className="h-full overflow-auto [&_.fc]:h-full">
       <FullCalendar
         ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={calendarView}
         initialDate={selectedDate}
         events={events}

@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 /**
  * Compact month grid for the sidebar.
- * Highlights today + selected date with indigo accent.
+ * Highlights today + selected date with the orange accent.
  */
 export function MiniCalendar() {
   const dispatch = useAppDispatch();
