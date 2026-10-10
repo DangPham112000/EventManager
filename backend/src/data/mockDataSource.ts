@@ -1,8 +1,18 @@
-import type { IDataSource, IEvent, IUser, CreateEventInput, UpdateEventInput } from './types.js';
+import { randomBytes } from 'node:crypto';
+import type { IDataSource, IEvent, IUser, CreateEventInput, UpdateEventInput, Participation } from './types.js';
 import { SEED_EVENTS } from './mockData.js';
+import { isMember } from '../participation.js';
 
 let events: IEvent[] = [...SEED_EVENTS];
 let nextId = events.length + 1;
+
+/** Replace the event at `id` with `change(existing)`; null if there is no such event. */
+function replace(id: string, change: (existing: IEvent) => IEvent): IEvent | null {
+  const index = events.findIndex((e) => e.id === id);
+  if (index === -1) return null;
+  events[index] = change(events[index]);
+  return events[index];
+}
 
 /**
  * In-memory data source for development.
@@ -17,7 +27,7 @@ export const mockDataSource: IDataSource = {
     return events
       .filter(
         (e) =>
-          (e.creator.id === userId || e.attendees.some((a) => a.id === userId)) &&
+          isMember(e, userId) &&
           (!to || new Date(e.startTime) < to) &&
           (!from || new Date(e.endTime) > from),
       )
@@ -32,35 +42,44 @@ export const mockDataSource: IDataSource = {
       startTime: input.startTime,
       endTime: input.endTime,
       location: input.location,
-      participation: input.participation ?? 'JOINED',
       creator,
-      attendees: [creator],
+      attendees: [{ user: creator, participation: input.participation ?? 'JOINED' }],
+      shareToken: randomBytes(16).toString('base64url'),
     };
     events.push(newEvent);
     return newEvent;
   },
 
   async updateEvent(id: string, input: UpdateEventInput) {
-    const index = events.findIndex((e) => e.id === id);
-    if (index === -1) return null;
-
-    const existing = events[index];
-    const updated: IEvent = {
+    return replace(id, (existing) => ({
       ...existing,
       ...(input.title !== undefined && { title: input.title }),
       ...(input.description !== undefined && { description: input.description }),
       ...(input.startTime !== undefined && { startTime: input.startTime }),
       ...(input.endTime !== undefined && { endTime: input.endTime }),
       ...(input.location !== undefined && { location: input.location }),
-      ...(input.participation !== undefined && { participation: input.participation }),
-    };
-    events[index] = updated;
-    return updated;
+    }));
   },
 
   async deleteEvent(id: string) {
     const initialLength = events.length;
     events = events.filter((e) => e.id !== id);
     return events.length < initialLength;
+  },
+
+  async joinEvent(id: string, user: IUser, participation: Participation) {
+    return replace(id, (existing) => ({
+      ...existing,
+      attendees: existing.attendees.some((a) => a.user.id === user.id)
+        ? existing.attendees.map((a) => (a.user.id === user.id ? { ...a, participation } : a))
+        : [...existing.attendees, { user, participation }],
+    }));
+  },
+
+  async leaveEvent(id: string, userId: string) {
+    return replace(id, (existing) => ({
+      ...existing,
+      attendees: existing.attendees.filter((a) => a.user.id !== userId),
+    }));
   },
 };

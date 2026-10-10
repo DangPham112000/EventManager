@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { getDataSource } from '../data/index.js';
 import type { IEvent, IUser, Participation, UpdateEventInput } from '../data/types.js';
 import { conflictsWith, findConflictPairs } from '../schedule.js';
+import { isMember, participationOf } from '../participation.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_RANGE_DAYS = 366;
@@ -48,12 +49,12 @@ function present(event: IEvent, user: IUser) {
     startTime: event.startTime,
     endTime: event.endTime,
     local: formatLocal(event.startTime, event.endTime),
-    participation: event.participation,
+    participation: participationOf(event, user.id),
     ...(event.location && { location: event.location }),
     ...(event.description && { description: event.description }),
     creator: event.creator.name,
     isOwner: event.creator.id === user.id,
-    attendees: event.attendees.map((a) => a.name),
+    attendees: event.attendees.map((a) => ({ name: a.user.name, participation: a.participation })),
   };
 }
 
@@ -88,7 +89,7 @@ export function createMcpServer(user: IUser): McpServer {
         `Current time: ${now.toISOString()} (${new Intl.DateTimeFormat('en-GB', { timeZone, dateStyle: 'full', timeStyle: 'short' }).format(now)} in ${timeZone}). Unless the user says otherwise, interpret times in ${timeZone}.`,
         'Always send times as ISO 8601 with an offset.',
         'Before creating or moving an event, the create/update tools check for overlaps and refuse when there are any; tell the user which events conflict and only retry with allowConflict=true if they agree.',
-        'Events have a participation of JOINED or INTERESTED; INTERESTED events are ignored when checking for conflicts.',
+        'Each attendee has their own participation, JOINED or INTERESTED; the user\'s INTERESTED events are ignored when checking for conflicts.',
         'Use find_conflicts to review a schedule and check_availability to test a time slot.',
         'Only events the user created (isOwner=true) can be updated or deleted.',
       ].join('\n'),
@@ -131,7 +132,7 @@ export function createMcpServer(user: IUser): McpServer {
     },
     async ({ id }) => {
       const event = await data.getEvent(id);
-      if (!event) return failure(`Event "${id}" not found.`);
+      if (!event || !isMember(event, user.id)) return failure(`Event "${id}" not found.`);
       return result(present(event, user));
     },
   );
@@ -152,7 +153,7 @@ export function createMcpServer(user: IUser): McpServer {
     async ({ startTime, endTime, excludeEventId }) => {
       if (Date.parse(endTime) <= Date.parse(startTime)) return failure('endTime must be after startTime.');
       const events = await data.getUserEvents(user.id, new Date(startTime), new Date(endTime));
-      const conflicts = conflictsWith({ startTime, endTime }, events, excludeEventId);
+      const conflicts = conflictsWith({ startTime, endTime }, events, user.id, excludeEventId);
       return result({
         free: conflicts.length === 0,
         slot: formatLocal(startTime, endTime),
@@ -177,7 +178,7 @@ export function createMcpServer(user: IUser): McpServer {
       const range = parseRange(from, to, 30);
       if ('error' in range) return failure(range.error!);
       const events = await data.getUserEvents(user.id, range.start, range.end);
-      const pairs = findConflictPairs(events);
+      const pairs = findConflictPairs(events, user.id);
       return result({
         from: range.start.toISOString(),
         to: range.end.toISOString(),
@@ -218,7 +219,7 @@ export function createMcpServer(user: IUser): McpServer {
       const startTime = new Date(input.startTime).toISOString();
       const endTime = new Date(input.endTime).toISOString();
       const nearby = await data.getUserEvents(user.id, new Date(startTime), new Date(endTime));
-      const conflicts = input.participation === 'INTERESTED' ? [] : conflictsWith({ startTime, endTime }, nearby);
+      const conflicts = input.participation === 'INTERESTED' ? [] : conflictsWith({ startTime, endTime }, nearby, user.id);
       if (conflicts.length > 0 && !allowConflict) {
         return result({
           created: false,
@@ -253,9 +254,9 @@ export function createMcpServer(user: IUser): McpServer {
       },
       annotations: { idempotentHint: true },
     },
-    async ({ id, allowConflict, ...changes }) => {
+    async ({ id, allowConflict, participation: newParticipation, ...changes }) => {
       const existing = await data.getEvent(id);
-      if (!existing) return failure(`Event "${id}" not found.`);
+      if (!existing || !isMember(existing, user.id)) return failure(`Event "${id}" not found.`);
       if (existing.creator.id !== user.id) return failure('Only the event creator can change it.');
 
       const input: UpdateEventInput = { ...changes };
@@ -266,10 +267,10 @@ export function createMcpServer(user: IUser): McpServer {
       if (Date.parse(endTime) <= Date.parse(startTime)) return failure('endTime must be after startTime.');
 
       let conflicts: IEvent[] = [];
-      const nextParticipation: Participation = input.participation ?? existing.participation;
-      if (nextParticipation === 'JOINED' && (input.startTime || input.endTime || input.participation)) {
+      const nextParticipation: Participation | null = newParticipation ?? participationOf(existing, user.id);
+      if (nextParticipation === 'JOINED' && (input.startTime || input.endTime || newParticipation)) {
         const nearby = await data.getUserEvents(user.id, new Date(startTime), new Date(endTime));
-        conflicts = conflictsWith({ startTime, endTime }, nearby, id);
+        conflicts = conflictsWith({ startTime, endTime }, nearby, user.id, id);
         if (conflicts.length > 0 && !allowConflict) {
           return result({
             updated: false,
@@ -279,7 +280,9 @@ export function createMcpServer(user: IUser): McpServer {
         }
       }
 
-      const event = await data.updateEvent(id, input);
+      let event = await data.updateEvent(id, input);
+      // Participation is per user, so this changes only the creator's own.
+      if (event && newParticipation) event = await data.joinEvent(id, user, newParticipation);
       if (!event) return failure(`Event "${id}" not found.`);
       return result({
         updated: true,
@@ -299,7 +302,7 @@ export function createMcpServer(user: IUser): McpServer {
     },
     async ({ id }) => {
       const existing = await data.getEvent(id);
-      if (!existing) return failure(`Event "${id}" not found.`);
+      if (!existing || !isMember(existing, user.id)) return failure(`Event "${id}" not found.`);
       if (existing.creator.id !== user.id) return failure('Only the event creator can delete it.');
       await data.deleteEvent(id);
       return result({ deleted: true, event: present(existing, user) });

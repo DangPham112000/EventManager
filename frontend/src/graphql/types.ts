@@ -12,6 +12,11 @@ export interface User {
   googleId: string;
 }
 
+export interface Attendee {
+  user: Pick<User, 'id' | 'name' | 'email' | 'avatar'>;
+  participation: Participation;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -19,12 +24,15 @@ export interface Event {
   startTime: string;
   endTime: string;
   location?: string;
-  participation: Participation;
+  /** The signed-in user's participation, or null if they have not joined. */
+  participation: Participation | null;
   creator: Pick<User, 'id' | 'name' | 'email' | 'avatar'>;
-  attendees: Pick<User, 'id' | 'name' | 'email' | 'avatar'>[];
+  attendees: Attendee[];
   googleEventId?: string;
   /** Whether the signed-in user created the event (only then can they edit or delete it). */
   isOwner: boolean;
+  /** Token for the share link; only attendees receive it. */
+  shareToken?: string | null;
 }
 
 // Query response types
@@ -47,6 +55,14 @@ export interface CreateEventData {
 
 export interface UpdateEventData {
   updateEvent: Event;
+}
+
+export interface JoinEventData {
+  joinEvent: Event;
+}
+
+export interface LeaveEventData {
+  leaveEvent: Event;
 }
 
 export interface DeleteEventData {

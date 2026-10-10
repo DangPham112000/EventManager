@@ -1,4 +1,5 @@
 import type { IEvent } from './data/types.js';
+import { participationOf } from './participation.js';
 
 interface TimeRange {
   startTime: string;
@@ -10,19 +11,24 @@ export function overlaps(a: TimeRange, b: TimeRange): boolean {
   return Date.parse(a.startTime) < Date.parse(b.endTime) && Date.parse(b.startTime) < Date.parse(a.endTime);
 }
 
-/** Events the user is only interested in are not commitments, so they never cause conflicts. */
-export function isCommitted(event: IEvent): boolean {
-  return event.participation !== 'INTERESTED';
+/**
+ * Whether the user has joined the event. Events they are only interested in
+ * are not commitments, so they never cause conflicts.
+ */
+export function isCommitted(event: IEvent, userId: string): boolean {
+  return participationOf(event, userId) === 'JOINED';
 }
 
-/** Joined events that overlap the given range, skipping `excludeId` (the event being edited). */
-export function conflictsWith(range: TimeRange, events: IEvent[], excludeId?: string): IEvent[] {
-  return events.filter((e) => e.id !== excludeId && isCommitted(e) && overlaps(range, e));
+/** The user's joined events that overlap the given range, skipping `excludeId` (the event being edited). */
+export function conflictsWith(range: TimeRange, events: IEvent[], userId: string, excludeId?: string): IEvent[] {
+  return events.filter((e) => e.id !== excludeId && isCommitted(e, userId) && overlaps(range, e));
 }
 
-/** Every overlapping pair of joined events in a schedule. */
-export function findConflictPairs(events: IEvent[]): [IEvent, IEvent][] {
-  const sorted = events.filter(isCommitted).sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
+/** Every overlapping pair of the user's joined events in a schedule. */
+export function findConflictPairs(events: IEvent[], userId: string): [IEvent, IEvent][] {
+  const sorted = events
+    .filter((e) => isCommitted(e, userId))
+    .sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
   const pairs: [IEvent, IEvent][] = [];
   for (let i = 0; i < sorted.length; i++) {
     const end = Date.parse(sorted[i].endTime);

@@ -13,6 +13,7 @@ import { GET_EVENT, GET_EVENTS } from '@/graphql/queries';
 import { DELETE_EVENT } from '@/graphql/mutations';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedEventId, openEventModal } from '@/store/uiSlice';
+import { AttendeeList, ParticipationControls } from './EventParticipation';
 import {
   MapPin,
   Clock,
@@ -115,12 +116,14 @@ export function EventDetailPanel() {
               <SheetTitle className="text-left text-lg leading-snug">
                 {event.title}
               </SheetTitle>
-              <Badge
-                variant={event.participation === 'INTERESTED' ? 'outline' : 'default'}
-                className={event.participation === 'INTERESTED' ? 'w-fit border-dashed' : 'w-fit'}
-              >
-                {event.participation === 'INTERESTED' ? 'Just interested' : 'Joined'}
-              </Badge>
+              {event.participation && (
+                <Badge
+                  variant={event.participation === 'INTERESTED' ? 'outline' : 'default'}
+                  className={event.participation === 'INTERESTED' ? 'w-fit border-dashed' : 'w-fit'}
+                >
+                  {event.participation === 'INTERESTED' ? 'Just interested' : 'Joined'}
+                </Badge>
+              )}
             </SheetHeader>
 
             <div className="flex flex-col gap-3 px-4 pb-4">
@@ -163,11 +166,15 @@ export function EventDetailPanel() {
                 </p>
               </div>
 
+              <AttendeeList event={event} />
+
+              <Separator className="my-1" />
+
+              <ParticipationControls event={event} onLeft={handleClose} />
+
               {/* Actions: only the creator can edit or delete */}
               {event.isOwner && (
                 <>
-                  <Separator className="my-1" />
-
                   <div className="flex gap-2">
                     <Button
                       variant="outline"

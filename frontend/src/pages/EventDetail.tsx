@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@apollo/client/react';
 import type { GetEventData } from '@/graphql/types';
 import { GET_EVENT, GET_EVENTS } from '@/graphql/queries';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useAppDispatch } from '@/store';
 import { openEventModal } from '@/store/uiSlice';
+import { AttendeeList, ParticipationControls } from '@/components/events/EventParticipation';
 import {
   ArrowLeft,
   MapPin,
@@ -24,9 +25,11 @@ export function EventDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  // Set when the page was opened from a share link, so the user can see and join the event.
+  const shareToken = useSearchParams()[0].get('share');
 
   const { data, loading, error } = useQuery<GetEventData>(GET_EVENT, {
-    variables: { id },
+    variables: { id, shareToken },
     skip: !id,
   });
 
@@ -164,6 +167,13 @@ export function EventDetail() {
             </div>
           </>
         )}
+
+        <Separator />
+        <p className="text-sm text-muted-foreground">Created by {event.creator.name}</p>
+        <div className="flex max-w-md flex-col gap-6">
+          <AttendeeList event={event} />
+          <ParticipationControls event={event} shareToken={shareToken} />
+        </div>
       </div>
     </div>
   );
