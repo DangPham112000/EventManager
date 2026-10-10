@@ -34,10 +34,10 @@ export function Header() {
     dayGridMonth: 'Month',
     timeGridWeek: 'Week',
     timeGridDay: 'Day',
-    listWeek: 'List',
+    listMonth: 'List',
   };
 
-  const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listWeek'] as const;
+  const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listMonth'] as const;
 
   return (
     <header className="flex w-full min-w-0 items-center gap-1 border-b border-border bg-background/80 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.25rem,env(safe-area-inset-left))] backdrop-blur-md sm:gap-2 sm:px-4">

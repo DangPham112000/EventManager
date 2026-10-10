@@ -7,7 +7,7 @@ interface UiState {
   isEventModalOpen: boolean;
   selectedDate: string; // ISO date string
   selectedEventId: string | null;
-  calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+  calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listMonth';
   editingEventId: string | null; // non-null when editing existing event in modal
   participationFilter: ParticipationFilter;
 }
