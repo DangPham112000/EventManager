@@ -2,6 +2,13 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export type ParticipationFilter = 'ALL' | 'JOINED' | 'INTERESTED';
 
+// Date range FullCalendar currently shows (ISO strings, end exclusive)
+export interface VisibleRange {
+  start: string;
+  end: string;
+  viewType: string;
+}
+
 interface UiState {
   isSidebarOpen: boolean;
   isEventModalOpen: boolean;
@@ -10,6 +17,7 @@ interface UiState {
   calendarView: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listUpcoming';
   editingEventId: string | null; // non-null when editing existing event in modal
   participationFilter: ParticipationFilter;
+  visibleRange: VisibleRange | null; // for the header title
 }
 
 const initialState: UiState = {
@@ -20,6 +28,7 @@ const initialState: UiState = {
   calendarView: 'dayGridMonth',
   editingEventId: null,
   participationFilter: 'ALL',
+  visibleRange: null,
 };
 
 const uiSlice = createSlice({
@@ -49,6 +58,9 @@ const uiSlice = createSlice({
     setParticipationFilter(state, action: PayloadAction<ParticipationFilter>) {
       state.participationFilter = action.payload;
     },
+    setVisibleRange(state, action: PayloadAction<VisibleRange>) {
+      state.visibleRange = action.payload;
+    },
     setCalendarView(state, action: PayloadAction<UiState['calendarView']>) {
       state.calendarView = action.payload;
     },
@@ -64,6 +76,7 @@ export const {
   setSelectedEventId,
   setCalendarView,
   setParticipationFilter,
+  setVisibleRange,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

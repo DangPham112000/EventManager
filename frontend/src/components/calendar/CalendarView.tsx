@@ -5,7 +5,12 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { setSelectedDate, setSelectedEventId, openEventModal } from '@/store/uiSlice';
+import {
+  setSelectedDate,
+  setSelectedEventId,
+  openEventModal,
+  setVisibleRange,
+} from '@/store/uiSlice';
 
 interface CalendarEvent {
   id: string;
@@ -84,7 +89,15 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   const handleDatesSet = useCallback(
     (info: DatesSetArg) => {
-      // Update the displayed date range in Redux for the header title
+      // Store the visible range for the header title, and its midpoint as the
+      // selected date (mini calendar, default date for new events)
+      dispatch(
+        setVisibleRange({
+          start: info.start.toISOString(),
+          end: info.end.toISOString(),
+          viewType: info.view.type,
+        }),
+      );
       const midpoint = new Date(
         (info.start.getTime() + info.end.getTime()) / 2,
       );
