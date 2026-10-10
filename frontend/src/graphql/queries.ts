@@ -22,6 +22,7 @@ export const GET_EVENTS = gql`
       endTime
       location
       participation
+      isOwner
       creator {
         id
         name
@@ -46,6 +47,7 @@ export const GET_EVENT = gql`
       endTime
       location
       participation
+      isOwner
       creator {
         id
         name

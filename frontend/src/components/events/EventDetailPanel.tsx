@@ -163,32 +163,36 @@ export function EventDetailPanel() {
                 </p>
               </div>
 
-              <Separator className="my-1" />
+              {/* Actions: only the creator can edit or delete */}
+              {event.isOwner && (
+                <>
+                  <Separator className="my-1" />
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 touch-target"
-                  onClick={handleEdit}
-                >
-                  <Pencil className="h-4 w-4" />
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive touch-target"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-4 w-4" />
-                  )}
-                  Delete
-                </Button>
-              </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 touch-target"
+                      onClick={handleEdit}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive touch-target"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                    >
+                      {deleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      Delete
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </>
         ) : (

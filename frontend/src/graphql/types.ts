@@ -23,6 +23,8 @@ export interface Event {
   creator: Pick<User, 'id' | 'name' | 'email' | 'avatar'>;
   attendees: Pick<User, 'id' | 'name' | 'email' | 'avatar'>[];
   googleEventId?: string;
+  /** Whether the signed-in user created the event (only then can they edit or delete it). */
+  isOwner: boolean;
 }
 
 // Query response types

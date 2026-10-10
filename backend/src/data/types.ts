@@ -41,7 +41,6 @@ export interface UpdateEventInput {
 }
 
 export interface IDataSource {
-  getEvents(): Promise<IEvent[]>;
   getEvent(id: string): Promise<IEvent | null>;
   /**
    * Events the user created or attends, sorted by start time.

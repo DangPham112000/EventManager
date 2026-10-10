@@ -24,6 +24,8 @@ export const typeDefs = `#graphql
     creator: User!
     attendees: [User!]!
     googleEventId: String
+    "Whether the signed-in user created this event, so may edit or delete it."
+    isOwner: Boolean!
   }
 
   input CreateEventInput {
