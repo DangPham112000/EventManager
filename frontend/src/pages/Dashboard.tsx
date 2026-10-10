@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client/react';
 import { GET_EVENTS } from '@/graphql/queries';
 import { useAppSelector } from '@/store';
 import { CalendarView } from '@/components/calendar/CalendarView';
+import { UpcomingList } from '@/components/calendar/UpcomingList';
 import { Loader2 } from 'lucide-react';
 
 interface EventData {
@@ -22,6 +23,7 @@ interface EventData {
  */
 export function Dashboard() {
   const filter = useAppSelector((s) => s.ui.participationFilter);
+  const calendarView = useAppSelector((s) => s.ui.calendarView);
   const { data, loading, error } = useQuery<{ getEvents: EventData[] }>(GET_EVENTS);
 
   // Map GraphQL events to FullCalendar format
@@ -68,7 +70,11 @@ export function Dashboard() {
 
   return (
     <div className="h-full">
-      <CalendarView events={calendarEvents} />
+      {calendarView === 'listUpcoming' ? (
+        <UpcomingList events={calendarEvents} />
+      ) : (
+        <CalendarView events={calendarEvents} />
+      )}
     </div>
   );
 }

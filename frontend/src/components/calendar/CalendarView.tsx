@@ -1,9 +1,8 @@
-import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
 import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedDate, setSelectedEventId, openEventModal } from '@/store/uiSlice';
@@ -22,7 +21,7 @@ interface CalendarViewProps {
 }
 
 /**
- * FullCalendar wrapper with custom theming.
+ * FullCalendar wrapper for the Month/Week/Day views (List is UpcomingList).
  * Listens for calendar-nav CustomEvents from the Header for prev/next navigation.
  */
 export function CalendarView({ events }: CalendarViewProps) {
@@ -30,23 +29,6 @@ export function CalendarView({ events }: CalendarViewProps) {
   const dispatch = useAppDispatch();
   const calendarView = useAppSelector((s) => s.ui.calendarView);
   const selectedDate = useAppSelector((s) => s.ui.selectedDate);
-
-  // The List view shows everything from today on: its range runs to the
-  // latest event end (at least through tomorrow so the range is never empty).
-  const upcomingRange = useMemo(() => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const minEnd = new Date(start);
-    minEnd.setDate(minEnd.getDate() + 1);
-    const latestEnd = events.reduce(
-      (max, evt) => Math.max(max, new Date(evt.end).getTime()),
-      minEnd.getTime(),
-    );
-    const end = new Date(latestEnd);
-    end.setHours(0, 0, 0, 0);
-    end.setDate(end.getDate() + 1);
-    return { start, end };
-  }, [events]);
 
   // Sync view type from Redux
   useEffect(() => {
@@ -102,8 +84,6 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   const handleDatesSet = useCallback(
     (info: DatesSetArg) => {
-      // The upcoming list is not tied to a month; keep the date other views use
-      if (info.view.type === 'listUpcoming') return;
       // Update the displayed date range in Redux for the header title
       const midpoint = new Date(
         (info.start.getTime() + info.end.getTime()) / 2,
@@ -117,7 +97,7 @@ export function CalendarView({ events }: CalendarViewProps) {
     <div className="h-full overflow-auto [&_.fc]:h-full">
       <FullCalendar
         ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView={calendarView}
         initialDate={selectedDate}
         events={events}
@@ -152,7 +132,6 @@ export function CalendarView({ events }: CalendarViewProps) {
           // Week columns need the date too, or the header is just "MON TUE…"
           timeGridWeek: { dayHeaderFormat: { weekday: 'short', day: 'numeric' } },
           timeGridDay: { dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric' } },
-          listUpcoming: { type: 'list', visibleRange: () => upcomingRange },
         }}
       />
     </div>

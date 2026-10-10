@@ -63,7 +63,7 @@
   --card-foreground: oklch(0.175 0.02 275);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.175 0.02 275);
-  --primary: oklch(0.50 0.22 275);
+  --primary: oklch(0.60 0.19 45);
   --primary-foreground: oklch(0.985 0.005 275);
   --secondary: oklch(0.955 0.015 275);
   --secondary-foreground: oklch(0.25 0.04 275);
@@ -74,8 +74,8 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.90 0.01 275);
   --input: oklch(0.90 0.01 275);
-  --ring: oklch(0.50 0.22 275);
-  --chart-1: oklch(0.55 0.20 275);
+  --ring: oklch(0.60 0.19 45);
+  --chart-1: oklch(0.60 0.19 45);
   --chart-2: oklch(0.60 0.18 300);
   --chart-3: oklch(0.65 0.15 250);
   --chart-4: oklch(0.50 0.15 320);
@@ -83,12 +83,12 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.97 0.01 275);
   --sidebar-foreground: oklch(0.175 0.02 275);
-  --sidebar-primary: oklch(0.50 0.22 275);
+  --sidebar-primary: oklch(0.60 0.19 45);
   --sidebar-primary-foreground: oklch(0.985 0.005 275);
   --sidebar-accent: oklch(0.94 0.02 275);
   --sidebar-accent-foreground: oklch(0.25 0.04 275);
   --sidebar-border: oklch(0.90 0.01 275);
-  --sidebar-ring: oklch(0.50 0.22 275);
+  --sidebar-ring: oklch(0.60 0.19 45);
 }
 
 /* ============================================================
@@ -102,7 +102,7 @@
   --card-foreground: oklch(0.93 0.01 275);
   --popover: oklch(0.225 0.02 275);
   --popover-foreground: oklch(0.93 0.01 275);
-  --primary: oklch(0.65 0.22 275);
+  --primary: oklch(0.68 0.19 45);
   --primary-foreground: oklch(0.985 0.005 275);
   --secondary: oklch(0.25 0.025 275);
   --secondary-foreground: oklch(0.90 0.01 275);
@@ -113,20 +113,20 @@
   --destructive: oklch(0.65 0.22 25);
   --border: oklch(0.30 0.02 275);
   --input: oklch(0.28 0.02 275);
-  --ring: oklch(0.65 0.22 275);
-  --chart-1: oklch(0.65 0.22 275);
+  --ring: oklch(0.68 0.19 45);
+  --chart-1: oklch(0.68 0.19 45);
   --chart-2: oklch(0.60 0.18 300);
   --chart-3: oklch(0.55 0.15 250);
   --chart-4: oklch(0.50 0.20 320);
   --chart-5: oklch(0.70 0.12 230);
   --sidebar: oklch(0.195 0.02 275);
   --sidebar-foreground: oklch(0.93 0.01 275);
-  --sidebar-primary: oklch(0.65 0.22 275);
+  --sidebar-primary: oklch(0.68 0.19 45);
   --sidebar-primary-foreground: oklch(0.985 0.005 275);
   --sidebar-accent: oklch(0.28 0.03 275);
   --sidebar-accent-foreground: oklch(0.93 0.01 275);
   --sidebar-border: oklch(0.30 0.02 275);
-  --sidebar-ring: oklch(0.65 0.22 275);
+  --sidebar-ring: oklch(0.68 0.19 45);
 }
 
 /* ============================================================
@@ -177,7 +177,7 @@
 }
 
 /* ============================================================
-   FullCalendar theme overrides — dark indigo/violet
+   FullCalendar theme overrides — dark with orange accent
    ============================================================ */
 :root .fc {
   /* Base */
@@ -196,7 +196,7 @@
   --fc-event-selected-overlay-color: oklch(0 0 0 / 15%);
 
   /* Today */
-  --fc-today-bg-color: oklch(0.65 0.22 275 / 8%);
+  --fc-today-bg-color: oklch(0.68 0.19 45 / 8%);
 
   /* Buttons */
   --fc-button-bg-color: var(--secondary);
@@ -212,7 +212,7 @@
   --fc-non-business-color: oklch(0.15 0.01 275 / 50%);
 
   /* Highlight on date select */
-  --fc-highlight-color: oklch(0.65 0.22 275 / 12%);
+  --fc-highlight-color: oklch(0.68 0.19 45 / 12%);
 }
 
 /* FullCalendar structural overrides */
@@ -240,7 +240,7 @@
 }
 
 .fc .fc-daygrid-day:hover {
-  background-color: oklch(0.65 0.22 275 / 5%);
+  background-color: oklch(0.68 0.19 45 / 5%);
 }
 
 .fc .fc-daygrid-day-number {
