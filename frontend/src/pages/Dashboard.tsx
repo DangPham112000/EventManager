@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { GET_EVENTS } from '@/graphql/queries';
+import { useAppSelector } from '@/store';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { Loader2 } from 'lucide-react';
 
@@ -11,6 +12,7 @@ interface EventData {
   endTime: string;
   description?: string;
   location?: string;
+  participation: 'JOINED' | 'INTERESTED';
   creator: { id: string; name: string };
 }
 
@@ -19,23 +21,28 @@ interface EventData {
  * Fetches events from GraphQL and passes them to CalendarView.
  */
 export function Dashboard() {
+  const filter = useAppSelector((s) => s.ui.participationFilter);
   const { data, loading, error } = useQuery<{ getEvents: EventData[] }>(GET_EVENTS);
 
   // Map GraphQL events to FullCalendar format
   const calendarEvents = useMemo(() => {
     if (!data?.getEvents) return [];
-    return data.getEvents.map((evt) => ({
+    return data.getEvents
+      .filter((evt) => filter === 'ALL' || evt.participation === filter)
+      .map((evt) => ({
       id: evt.id,
       title: evt.title,
       start: evt.startTime,
       end: evt.endTime,
+      classNames: evt.participation === 'INTERESTED' ? ['fc-event-interested'] : [],
       extendedProps: {
+        participation: evt.participation,
         description: evt.description,
         location: evt.location,
         creator: evt.creator,
       },
     }));
-  }, [data]);
+  }, [data, filter]);
 
   if (loading) {
     return (

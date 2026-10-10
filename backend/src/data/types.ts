@@ -1,3 +1,5 @@
+export type Participation = 'JOINED' | 'INTERESTED';
+
 export interface IUser {
   id: string;
   email: string;
@@ -13,6 +15,7 @@ export interface IEvent {
   startTime: string;
   endTime: string;
   location?: string;
+  participation: Participation;
   creator: IUser;
   attendees: IUser[];
   googleEventId?: string;
@@ -24,6 +27,8 @@ export interface CreateEventInput {
   startTime: string;
   endTime: string;
   location?: string;
+  /** Defaults to JOINED. */
+  participation?: Participation;
 }
 
 export interface UpdateEventInput {
@@ -32,6 +37,7 @@ export interface UpdateEventInput {
   startTime?: string;
   endTime?: string;
   location?: string;
+  participation?: Participation;
 }
 
 export interface IDataSource {

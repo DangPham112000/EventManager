@@ -10,7 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MiniCalendar } from '../calendar/MiniCalendar';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { setSidebarOpen, openEventModal } from '@/store/uiSlice';
+import {
+  setSidebarOpen,
+  openEventModal,
+  setParticipationFilter,
+  type ParticipationFilter,
+} from '@/store/uiSlice';
 
 /**
  * Sheet sidebar — slides from left.
@@ -20,6 +25,7 @@ export function Sidebar() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isOpen = useAppSelector((s) => s.ui.isSidebarOpen);
+  const filter = useAppSelector((s) => s.ui.participationFilter);
 
   const handleNavigate = (path: string) => {
     navigate(path);
@@ -61,6 +67,34 @@ export function Sidebar() {
         {/* Mini Calendar */}
         <div className="px-3 py-2">
           <MiniCalendar />
+        </div>
+
+        <Separator className="my-1" />
+
+        {/* Participation filter */}
+        <div className="px-4 py-2">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Show events</p>
+          <div className="grid grid-cols-3 gap-1" role="radiogroup" aria-label="Filter events">
+            {(
+              [
+                ['ALL', 'All'],
+                ['JOINED', 'Joined'],
+                ['INTERESTED', 'Interested'],
+              ] as [ParticipationFilter, string][]
+            ).map(([value, label]) => (
+              <Button
+                key={value}
+                size="sm"
+                role="radio"
+                aria-checked={filter === value}
+                variant={filter === value ? 'default' : 'outline'}
+                className="px-2 text-xs"
+                onClick={() => dispatch(setParticipationFilter(value))}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <Separator className="my-1" />

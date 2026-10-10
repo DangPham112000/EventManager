@@ -72,6 +72,7 @@ function mapEvent(doc: any): IEvent {
     startTime: doc.startTime instanceof Date ? doc.startTime.toISOString() : doc.startTime,
     endTime: doc.endTime instanceof Date ? doc.endTime.toISOString() : doc.endTime,
     location: doc.location,
+    participation: doc.participation ?? 'JOINED',
     creator: {
       id: doc.creator._id.toString(),
       email: doc.creator.email,

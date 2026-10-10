@@ -7,6 +7,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { GET_EVENT, GET_EVENTS } from '@/graphql/queries';
 import { DELETE_EVENT } from '@/graphql/mutations';
@@ -114,6 +115,12 @@ export function EventDetailPanel() {
               <SheetTitle className="text-left text-lg leading-snug">
                 {event.title}
               </SheetTitle>
+              <Badge
+                variant={event.participation === 'INTERESTED' ? 'outline' : 'default'}
+                className={event.participation === 'INTERESTED' ? 'w-fit border-dashed' : 'w-fit'}
+              >
+                {event.participation === 'INTERESTED' ? 'Just interested' : 'Joined'}
+              </Badge>
             </SheetHeader>
 
             <div className="flex flex-col gap-3 px-4 pb-4">
