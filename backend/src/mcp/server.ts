@@ -11,12 +11,15 @@ const MAX_RANGE_DAYS = 366;
 // Used only to show times in a readable form; all inputs and stored values are absolute.
 const timeZone = process.env.MCP_TIMEZONE || 'Asia/Ho_Chi_Minh';
 
-const isoTime = z
-  .string()
-  .refine((s) => /(Z|[+-]\d{2}:?\d{2})$/i.test(s) && !Number.isNaN(Date.parse(s)), {
-    message: 'Use ISO 8601 with a timezone offset, e.g. 2026-10-09T14:00:00+07:00',
-  })
-  .describe('ISO 8601 date-time with timezone offset, e.g. 2026-10-09T14:00:00+07:00');
+// A factory, not a shared instance: reusing one zod schema makes the generated
+// JSON Schema point at it with "$ref", which Gemini cannot resolve, so it drops the tools.
+const isoTime = () =>
+  z
+    .string()
+    .refine((s) => /(Z|[+-]\d{2}:?\d{2})$/i.test(s) && !Number.isNaN(Date.parse(s)), {
+      message: 'Use ISO 8601 with a timezone offset, e.g. 2026-10-09T14:00:00+07:00',
+    })
+    .describe('ISO 8601 date-time with timezone offset, e.g. 2026-10-09T14:00:00+07:00');
 
 const participation = z
   .enum(['JOINED', 'INTERESTED'])
@@ -103,8 +106,8 @@ export function createMcpServer(user: IUser): McpServer {
       description:
         'List events in the user\'s calendar (created or attending) that overlap a time range, sorted by start time. Defaults to the next 30 days.',
       inputSchema: {
-        from: isoTime.optional().describe('Range start (default: now)'),
-        to: isoTime.optional().describe('Range end (default: from + 30 days)'),
+        from: isoTime().optional().describe('Range start (default: now)'),
+        to: isoTime().optional().describe('Range end (default: from + 30 days)'),
       },
       annotations: { readOnlyHint: true },
     },
@@ -144,8 +147,8 @@ export function createMcpServer(user: IUser): McpServer {
       description:
         'Check whether a time slot is free. Returns the user\'s events that overlap it (back-to-back events do not count).',
       inputSchema: {
-        startTime: isoTime,
-        endTime: isoTime,
+        startTime: isoTime(),
+        endTime: isoTime(),
         excludeEventId: z.string().optional().describe('Ignore this event, e.g. when rescheduling it'),
       },
       annotations: { readOnlyHint: true },
@@ -169,8 +172,8 @@ export function createMcpServer(user: IUser): McpServer {
       description:
         'Find every pair of overlapping events in the user\'s calendar within a time range. Defaults to the next 30 days.',
       inputSchema: {
-        from: isoTime.optional().describe('Range start (default: now)'),
-        to: isoTime.optional().describe('Range end (default: from + 30 days)'),
+        from: isoTime().optional().describe('Range start (default: now)'),
+        to: isoTime().optional().describe('Range end (default: from + 30 days)'),
       },
       annotations: { readOnlyHint: true },
     },
@@ -204,8 +207,8 @@ export function createMcpServer(user: IUser): McpServer {
         'Create an event owned by the user. Refuses and lists the overlapping events if the time is taken, unless allowConflict is true.',
       inputSchema: {
         title: z.string().min(1).max(200),
-        startTime: isoTime,
-        endTime: isoTime,
+        startTime: isoTime(),
+        endTime: isoTime(),
         description: z.string().max(5000).optional(),
         location: z.string().max(500).optional(),
         participation: participation.optional(),
@@ -245,8 +248,8 @@ export function createMcpServer(user: IUser): McpServer {
       inputSchema: {
         id: z.string().describe('Event id'),
         title: z.string().min(1).max(200).optional(),
-        startTime: isoTime.optional(),
-        endTime: isoTime.optional(),
+        startTime: isoTime().optional(),
+        endTime: isoTime().optional(),
         description: z.string().max(5000).optional(),
         location: z.string().max(500).optional(),
         participation: participation.optional(),
