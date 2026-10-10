@@ -13,9 +13,9 @@ import { EventDetailPanel } from '../events/EventDetailPanel';
  */
 export function AppLayout() {
   return (
-    <div className="flex h-dvh flex-col bg-background safe-top">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background safe-top">
       <Header />
-      <main className="flex-1 overflow-hidden">
+      <main className="min-h-0 min-w-0 flex-1 overflow-hidden pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <Outlet />
       </main>
       <Sidebar />
