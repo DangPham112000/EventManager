@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAppDispatch } from '@/store';
 import { openEventModal } from '@/store/uiSlice';
 import { AttendeeList, ParticipationControls } from '@/components/events/EventParticipation';
+import { EventIcon } from '@/components/events/EventIcon';
 import {
   ArrowLeft,
   MapPin,
@@ -135,7 +136,10 @@ export function EventDetail() {
         {/* Title with color accent */}
         <div>
           <div className="mb-3 h-1 w-16 rounded-full bg-primary" />
-          <h1 className="text-2xl font-bold text-foreground">{event.title}</h1>
+          <h1 className="text-2xl font-bold text-foreground">
+            <EventIcon event={event} className="mr-2 h-6 w-6 align-[-0.15em] text-primary" />
+            {event.title}
+          </h1>
         </div>
 
         {/* Time */}

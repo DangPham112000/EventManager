@@ -3,7 +3,8 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, DateSelectArg, DatesSetArg } from '@fullcalendar/core';
+import type { EventClickArg, DateSelectArg, DatesSetArg, EventContentArg } from '@fullcalendar/core';
+import { EventIcon } from '@/components/events/EventIcon';
 import { useAppDispatch, useAppSelector } from '@/store';
 import {
   setSelectedDate,
@@ -23,6 +24,30 @@ interface CalendarEvent {
 
 interface CalendarViewProps {
   events: CalendarEvent[];
+}
+
+/** FullCalendar's default event markup, with the event's icon before the title. */
+function renderEventContent(arg: EventContentArg) {
+  const { event } = arg;
+  const { icon, location, description } = event.extendedProps as {
+    icon?: string | null;
+    location?: string;
+    description?: string;
+  };
+  return (
+    <div className="fc-event-main-frame">
+      {arg.timeText && <div className="fc-event-time">{arg.timeText}</div>}
+      <div className="fc-event-title-container">
+        <div className="fc-event-title fc-sticky">
+          <EventIcon
+            event={{ icon, title: event.title, location, description }}
+            className="mr-1 h-[1.1em] w-[1.1em] align-[-0.2em]"
+          />
+          {event.title || '\u00a0'}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -125,6 +150,7 @@ export function CalendarView({ events }: CalendarViewProps) {
         eventDisplay="block"
         weekends={true}
         nowIndicator={true}
+        eventContent={renderEventContent}
         eventClick={handleEventClick}
         select={handleDateSelect}
         datesSet={handleDatesSet}

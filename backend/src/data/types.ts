@@ -21,6 +21,8 @@ export interface IEvent {
   startTime: string;
   endTime: string;
   location?: string;
+  /** A key from EVENT_ICONS; unset when the user has not picked one. */
+  icon?: string;
   creator: IUser;
   /** Everyone taking part, including the creator, each with their own participation. */
   attendees: IAttendee[];
@@ -35,6 +37,7 @@ export interface CreateEventInput {
   startTime: string;
   endTime: string;
   location?: string;
+  icon?: string;
   /** The creator's participation. Defaults to JOINED. */
   participation?: Participation;
 }
@@ -45,6 +48,8 @@ export interface UpdateEventInput {
   startTime?: string;
   endTime?: string;
   location?: string;
+  /** null removes the icon. */
+  icon?: string | null;
 }
 
 export interface IDataSource {

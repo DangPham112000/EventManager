@@ -20,6 +20,8 @@ const eventSchema = new mongoose.Schema({
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
   location: { type: String },
+  // A key from EVENT_ICONS; unset means the app suggests one from the title.
+  icon: { type: String },
   creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   // Each attendee's own participation; the creator is always one of them.
   attendees: [attendeeSchema],

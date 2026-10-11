@@ -4,6 +4,7 @@ import { getDataSource } from '../data/index.js';
 import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js';
 import type { CreateEventInput, IEvent, IUser, Participation, UpdateEventInput } from '../data/types.js';
 import { isMember, participationOf } from '../participation.js';
+import { isEventIcon } from '../icons.js';
 
 export interface Context {
   user: IUser | null;
@@ -55,6 +56,12 @@ async function getOwnedEvent(id: string, user: IUser): Promise<IEvent> {
   return event;
 }
 
+function checkIcon(icon: string | null | undefined): void {
+  if (icon != null && !isEventIcon(icon)) {
+    throw new GraphQLError(`Unknown icon "${icon}"`, { extensions: { code: 'BAD_USER_INPUT' } });
+  }
+}
+
 export const resolvers = {
   Query: {
     me: (_: unknown, __: unknown, ctx: Context) => ctx.user,
@@ -89,7 +96,8 @@ export const resolvers = {
   Mutation: {
     createEvent: async (_: unknown, { input }: { input: CreateEventInput }, ctx: Context) => {
       const user = requireUser(ctx);
-      return getDataSource().createEvent(input, user);
+      checkIcon(input.icon);
+      return getDataSource().createEvent({ ...input, icon: input.icon ?? undefined }, user);
     },
 
     updateEvent: async (
@@ -98,6 +106,7 @@ export const resolvers = {
       ctx: Context,
     ) => {
       const user = requireUser(ctx);
+      checkIcon(input.icon);
       await getOwnedEvent(id, user);
       const { participation, ...fields } = input;
       let updated = await getDataSource().updateEvent(id, fields);

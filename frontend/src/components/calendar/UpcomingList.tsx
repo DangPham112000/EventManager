@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { MapPin } from 'lucide-react';
 import { useAppDispatch } from '@/store';
 import { setSelectedEventId } from '@/store/uiSlice';
+import { EventIcon } from '@/components/events/EventIcon';
 
 interface UpcomingEvent {
   id: string;
@@ -11,6 +12,8 @@ interface UpcomingEvent {
   extendedProps?: {
     participation?: 'JOINED' | 'INTERESTED';
     location?: string;
+    description?: string;
+    icon?: string | null;
   };
 }
 
@@ -122,7 +125,13 @@ export function UpcomingList({ events }: UpcomingListProps) {
                       aria-label={interested ? 'Interested' : 'Joined'}
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="font-medium">{event.title}</span>
+                      <span className="font-medium">
+                        <EventIcon
+                          event={{ ...event.extendedProps, title: event.title }}
+                          className="mr-1.5 h-4 w-4 align-[-0.2em] text-primary"
+                        />
+                        {event.title}
+                      </span>
                       {days > 1 && (
                         <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                           {days} days

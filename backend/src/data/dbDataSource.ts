@@ -40,7 +40,9 @@ export const dbDataSource: IDataSource = {
 
   async updateEvent(id: string, input: UpdateEventInput): Promise<IEvent | null> {
     if (!mongoose.isValidObjectId(id)) return null;
-    const event = await Event.findByIdAndUpdate(id, input, { new: true }).populate(POPULATE);
+    const { icon, ...fields } = input;
+    const update = icon === null ? { ...fields, $unset: { icon: '' } } : input;
+    const event = await Event.findByIdAndUpdate(id, update, { new: true }).populate(POPULATE);
     if (!event) return null;
     return mapEvent(event);
   },
@@ -103,6 +105,7 @@ function mapEvent(doc: any): IEvent {
     startTime: doc.startTime instanceof Date ? doc.startTime.toISOString() : doc.startTime,
     endTime: doc.endTime instanceof Date ? doc.endTime.toISOString() : doc.endTime,
     location: doc.location,
+    icon: doc.icon ?? undefined,
     creator: mapUser(doc.creator),
     attendees: (doc.attendees || [])
       // Skip attendees whose user was deleted.

@@ -13,6 +13,7 @@ interface EventData {
   endTime: string;
   description?: string;
   location?: string;
+  icon?: string | null;
   participation: 'JOINED' | 'INTERESTED';
   creator: { id: string; name: string };
 }
@@ -41,6 +42,7 @@ export function Dashboard() {
         participation: evt.participation,
         description: evt.description,
         location: evt.location,
+        icon: evt.icon,
         creator: evt.creator,
       },
     }));

@@ -25,6 +25,8 @@ export const typeDefs = `#graphql
     startTime: String!
     endTime: String!
     location: String
+    "Icon key shown before the title (see EVENT_ICONS), or null when none was picked."
+    icon: String
     "The signed-in user's participation, or null if they are not an attendee."
     participation: Participation
     creator: User!
@@ -43,6 +45,7 @@ export const typeDefs = `#graphql
     startTime: String!
     endTime: String!
     location: String
+    icon: String
     participation: Participation
   }
 
@@ -52,6 +55,8 @@ export const typeDefs = `#graphql
     startTime: String
     endTime: String
     location: String
+    "An icon key, or null to remove the icon."
+    icon: String
     "Changes the creator's own participation."
     participation: Participation
   }
