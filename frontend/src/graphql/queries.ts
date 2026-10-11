@@ -21,6 +21,7 @@ export const GET_EVENTS = gql`
       startTime
       endTime
       location
+      icon
       participation
       isOwner
       creator {
@@ -49,6 +50,7 @@ export const GET_EVENT = gql`
       startTime
       endTime
       location
+      icon
       participation
       isOwner
       creator {

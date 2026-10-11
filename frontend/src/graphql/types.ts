@@ -24,6 +24,8 @@ export interface Event {
   startTime: string;
   endTime: string;
   location?: string;
+  /** Icon key picked for the event; null when none was picked (one is then suggested). */
+  icon?: string | null;
   /** The signed-in user's participation, or null if they have not joined. */
   participation: Participation | null;
   creator: Pick<User, 'id' | 'name' | 'email' | 'avatar'>;

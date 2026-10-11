@@ -20,6 +20,7 @@
 | `startTime`     | `String!`  | ✅       | Start time (ISO 8601)               |
 | `endTime`       | `String!`  | ✅       | End time (ISO 8601)                 |
 | `location`      | `String`   | ❌       | Event location                      |
+| `icon`          | `String`   | ❌       | Icon key shown before the title (see `backend/src/icons.ts`); unset means one is suggested from the title |
 | `participation` | `Participation` | ❌  | The signed-in user's own participation (`JOINED` or `INTERESTED`), or null if they are not an attendee; their interested events are ignored by conflict checks |
 | `creator`       | `User!`    | ✅       | User who created the event          |
 | `attendees`     | `[Attendee!]!` | ✅   | Everyone taking part, including the creator, each with their own participation |

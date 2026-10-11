@@ -4,6 +4,7 @@ import { getDataSource } from '../data/index.js';
 import type { IEvent, IUser, Participation, UpdateEventInput } from '../data/types.js';
 import { conflictsWith, findConflictPairs } from '../schedule.js';
 import { isMember, participationOf } from '../participation.js';
+import { EVENT_ICONS, EVENT_ICON_KEYS } from '../icons.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_RANGE_DAYS = 366;
@@ -26,6 +27,16 @@ const participation = z
   .describe(
     'JOINED: the user is attending (default). INTERESTED: only following the event; it never counts as a schedule conflict.',
   );
+
+// A factory for the same reason as isoTime: create_event and update_event both use it.
+const icon = () =>
+  z
+    .enum(EVENT_ICON_KEYS)
+    .describe(
+      `Icon shown before the title. Pick the one that fits the event: ${Object.entries(EVENT_ICONS)
+        .map(([key, label]) => `${key} = ${label}`)
+        .join('; ')}. When omitted the app guesses one from the title.`,
+    );
 
 const allowConflict = z
   .boolean()
@@ -53,6 +64,7 @@ function present(event: IEvent, user: IUser) {
     endTime: event.endTime,
     local: formatLocal(event.startTime, event.endTime),
     participation: participationOf(event, user.id),
+    ...(event.icon && { icon: event.icon }),
     ...(event.location && { location: event.location }),
     ...(event.description && { description: event.description }),
     creator: event.creator.name,
@@ -95,6 +107,7 @@ export function createMcpServer(user: IUser): McpServer {
         'Each attendee has their own participation, JOINED or INTERESTED; the user\'s INTERESTED events are ignored when checking for conflicts.',
         'Use find_conflicts to review a schedule and check_availability to test a time slot.',
         'Only events the user created (isOwner=true) can be updated or deleted.',
+        'Give new events an icon that fits them (e.g. plane for a trip abroad, run for a running event).',
       ].join('\n'),
     },
   );
@@ -211,6 +224,7 @@ export function createMcpServer(user: IUser): McpServer {
         endTime: isoTime(),
         description: z.string().max(5000).optional(),
         location: z.string().max(500).optional(),
+        icon: icon().optional(),
         participation: participation.optional(),
         allowConflict,
       },
@@ -252,6 +266,7 @@ export function createMcpServer(user: IUser): McpServer {
         endTime: isoTime().optional(),
         description: z.string().max(5000).optional(),
         location: z.string().max(500).optional(),
+        icon: icon().optional(),
         participation: participation.optional(),
         allowConflict,
       },

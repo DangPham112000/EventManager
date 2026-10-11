@@ -42,6 +42,7 @@ export const mockDataSource: IDataSource = {
       startTime: input.startTime,
       endTime: input.endTime,
       location: input.location,
+      icon: input.icon,
       creator,
       attendees: [{ user: creator, participation: input.participation ?? 'JOINED' }],
       shareToken: randomBytes(16).toString('base64url'),
@@ -58,6 +59,7 @@ export const mockDataSource: IDataSource = {
       ...(input.startTime !== undefined && { startTime: input.startTime }),
       ...(input.endTime !== undefined && { endTime: input.endTime }),
       ...(input.location !== undefined && { location: input.location }),
+      ...(input.icon !== undefined && { icon: input.icon ?? undefined }),
     }));
   },
 

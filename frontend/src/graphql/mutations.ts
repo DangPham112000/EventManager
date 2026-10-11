@@ -9,6 +9,7 @@ export const CREATE_EVENT = gql`
       startTime
       endTime
       location
+      icon
       participation
       creator {
         id
@@ -35,6 +36,7 @@ export const UPDATE_EVENT = gql`
       startTime
       endTime
       location
+      icon
       participation
       creator {
         id

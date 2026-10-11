@@ -14,6 +14,7 @@ import { DELETE_EVENT } from '@/graphql/mutations';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedEventId, openEventModal } from '@/store/uiSlice';
 import { AttendeeList, ParticipationControls } from './EventParticipation';
+import { EventIcon } from './EventIcon';
 import {
   MapPin,
   Clock,
@@ -114,6 +115,7 @@ export function EventDetailPanel() {
               {/* Color accent bar */}
               <div className="mb-2 h-1 w-12 rounded-full bg-primary" />
               <SheetTitle className="text-left text-lg leading-snug">
+                <EventIcon event={event} className="mr-2 h-5 w-5 align-[-0.2em] text-primary" />
                 {event.title}
               </SheetTitle>
               {event.participation && (
