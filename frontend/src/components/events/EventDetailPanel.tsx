@@ -103,7 +103,7 @@ export function EventDetailPanel() {
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent
         side="bottom"
-        className="max-h-[70dvh] rounded-t-2xl safe-bottom sm:max-h-none sm:w-[380px] sm:rounded-none sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-0 sm:data-[side=bottom]:left-auto sm:data-[side=bottom]:border-l sm:data-[side=bottom]:border-t-0"
+        className="max-h-[70dvh] overflow-hidden rounded-t-2xl safe-bottom sm:max-h-dvh sm:w-[380px] sm:rounded-none sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-0 sm:data-[side=bottom]:left-auto sm:data-[side=bottom]:border-l sm:data-[side=bottom]:border-t-0"
       >
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -111,7 +111,7 @@ export function EventDetailPanel() {
           </div>
         ) : event ? (
           <>
-            <SheetHeader className="px-4 pt-4 pb-2">
+            <SheetHeader className="shrink-0 px-4 pt-4 pb-2">
               {/* Color accent bar */}
               <div className="mb-2 h-1 w-12 rounded-full bg-primary" />
               <SheetTitle className="text-left text-lg leading-snug">
@@ -128,7 +128,8 @@ export function EventDetailPanel() {
               )}
             </SheetHeader>
 
-            <div className="flex flex-col gap-3 px-4 pb-4">
+            {/* Body scrolls on its own so a long description never pushes the header away */}
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 pb-4">
               {/* Time */}
               <div className="flex items-start gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
