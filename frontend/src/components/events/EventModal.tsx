@@ -21,6 +21,7 @@ import type { Participation } from '@/graphql/types';
 import { IconGlyph } from './EventIcon';
 import { EVENT_ICONS, EVENT_ICON_KEYS, NO_ICON, suggestEventIcon } from '@/lib/eventIcons';
 import { cn } from '@/lib/utils';
+import { useVisualViewport } from '@/lib/useVisualViewport';
 
 /**
  * Format an ISO string to `YYYY-MM-DDTHH:mm` for datetime-local input.
@@ -70,6 +71,8 @@ export function EventModal() {
   const editingId = useAppSelector((s) => s.ui.editingEventId);
   const selectedDate = useAppSelector((s) => s.ui.selectedDate);
   const isEditing = editingId !== null;
+  // Follow the visible area so the on-screen keyboard cannot cover the form.
+  const viewport = useVisualViewport(isOpen);
 
   const [form, setForm] = useState<FormData>({
     title: '',
@@ -185,7 +188,17 @@ export function EventModal() {
       {/* Cap the dialog at the visible viewport (dvh tracks iOS Safari's
           toolbars) and scroll only the fields, so the header and the save
           button stay reachable on short phone screens. */}
-      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-md">
+      <DialogContent
+        className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-md"
+        style={
+          viewport
+            ? {
+                top: viewport.offsetTop + viewport.height / 2,
+                maxHeight: viewport.height - 32,
+              }
+            : undefined
+        }
+      >
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Event' : 'New Event'}</DialogTitle>
         </DialogHeader>
