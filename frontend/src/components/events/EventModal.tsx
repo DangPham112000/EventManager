@@ -182,12 +182,15 @@ export function EventModal() {
         if (!open) dispatch(closeEventModal());
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      {/* Cap the dialog at the visible viewport (dvh tracks iOS Safari's
+          toolbars) and scroll only the fields, so the header and the save
+          button stay reachable on short phone screens. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Event' : 'New Event'}</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4 py-2">
+        <div className="-mx-4 flex min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain px-4 py-2">
           {/* Title */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="event-title">Title</Label>
