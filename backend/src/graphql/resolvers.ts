@@ -5,6 +5,13 @@ import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js';
 import type { CreateEventInput, IEvent, IUser, Participation, UpdateEventInput } from '../data/types.js';
 import { isMember, participationOf } from '../participation.js';
 import { isEventIcon } from '../icons.js';
+import {
+  getCalendarShare,
+  getSharedCalendar,
+  regenerateCalendarShareToken,
+  updateCalendarShare,
+  type CalendarShareMode,
+} from '../calendarShare.js';
 
 export interface Context {
   user: IUser | null;
@@ -82,6 +89,11 @@ export const resolvers = {
     },
 
     apiKeys: async (_: unknown, __: unknown, ctx: Context) => listApiKeys(requireUser(ctx)),
+
+    calendarShare: async (_: unknown, __: unknown, ctx: Context) => getCalendarShare(requireUser(ctx)),
+
+    // Public: anyone with the link may read it, signed in or not.
+    sharedCalendar: async (_: unknown, { token }: { token: string }) => getSharedCalendar(token),
   },
 
   Event: {
@@ -155,5 +167,14 @@ export const resolvers = {
 
     revokeApiKey: async (_: unknown, { id }: { id: string }, ctx: Context) =>
       revokeApiKey(requireUser(ctx), id),
+
+    updateCalendarShare: async (
+      _: unknown,
+      change: { enabled?: boolean | null; mode?: CalendarShareMode | null },
+      ctx: Context,
+    ) => updateCalendarShare(requireUser(ctx), change),
+
+    regenerateCalendarShareToken: async (_: unknown, __: unknown, ctx: Context) =>
+      regenerateCalendarShareToken(requireUser(ctx)),
   },
 };

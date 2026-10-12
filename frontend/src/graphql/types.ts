@@ -86,3 +86,37 @@ export interface ApiKeysData {
 export interface CreateApiKeyData {
   createApiKey: { key: string; apiKey: ApiKey };
 }
+
+/** PRIVATE shows only busy times; PUBLIC shows every event's details. */
+export type CalendarShareMode = 'PRIVATE' | 'PUBLIC';
+
+export interface CalendarShare {
+  enabled: boolean;
+  mode: CalendarShareMode;
+  /** Secret in the share link; null until sharing is first turned on. */
+  token: string | null;
+}
+
+export interface CalendarShareData {
+  calendarShare: CalendarShare;
+}
+
+/** An event as a share link shows it. In PRIVATE mode the title is "Busy" and the rest is null. */
+export interface SharedEvent {
+  id: string;
+  title: string;
+  startTime: string;
+  endTime: string;
+  description: string | null;
+  location: string | null;
+  icon: string | null;
+  participation: Participation | null;
+}
+
+export interface SharedCalendarData {
+  sharedCalendar: {
+    ownerName: string;
+    mode: CalendarShareMode;
+    events: SharedEvent[];
+  } | null;
+}

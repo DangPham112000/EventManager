@@ -77,12 +77,49 @@ export const typeDefs = `#graphql
     apiKey: ApiKey!
   }
 
+  enum CalendarShareMode {
+    "People with the link see when the owner is busy, but no event details."
+    PRIVATE
+    "People with the link see every event's details."
+    PUBLIC
+  }
+
+  "The signed-in user's read-only calendar link."
+  type CalendarShare {
+    enabled: Boolean!
+    mode: CalendarShareMode!
+    "Secret in the link (/share/:token); null until sharing is first turned on."
+    token: String
+  }
+
+  "One event as a share link shows it. In PRIVATE mode the title is Busy and the other fields are null."
+  type SharedEvent {
+    id: ID!
+    title: String!
+    startTime: String!
+    endTime: String!
+    description: String
+    location: String
+    icon: String
+    "The owner's participation."
+    participation: Participation
+  }
+
+  type SharedCalendar {
+    ownerName: String!
+    mode: CalendarShareMode!
+    events: [SharedEvent!]!
+  }
+
   type Query {
     me: User
     getEvents: [Event!]!
     "An event the user created or attends, or any event when the matching shareToken is given."
     getEvent(id: ID!, shareToken: String): Event
     apiKeys: [ApiKey!]!
+    calendarShare: CalendarShare!
+    "The calendar behind a share link. Needs no sign-in; null when the link is unknown or sharing is off."
+    sharedCalendar(token: String!): SharedCalendar
   }
 
   type Mutation {
@@ -95,5 +132,9 @@ export const typeDefs = `#graphql
     leaveEvent(eventId: ID!): Event!
     createApiKey(name: String!): CreatedApiKey!
     revokeApiKey(id: ID!): Boolean!
+    "Turn calendar sharing on or off, or change its mode."
+    updateCalendarShare(enabled: Boolean, mode: CalendarShareMode): CalendarShare!
+    "Replace the share link; the old link stops working."
+    regenerateCalendarShareToken: CalendarShare!
   }
 `;

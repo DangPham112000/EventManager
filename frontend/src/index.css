@@ -448,3 +448,9 @@
 body {
   overscroll-behavior: none;
 }
+/* Busy blocks on a calendar shared in private mode */
+.fc .fc-event.fc-event-busy {
+  background-color: var(--muted-foreground);
+  border-color: var(--muted-foreground) !important;
+  cursor: default;
+}

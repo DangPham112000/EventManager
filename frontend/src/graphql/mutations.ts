@@ -119,3 +119,23 @@ export const REVOKE_API_KEY = gql`
     revokeApiKey(id: $id)
   }
 `;
+
+export const UPDATE_CALENDAR_SHARE = gql`
+  mutation UpdateCalendarShare($enabled: Boolean, $mode: CalendarShareMode) {
+    updateCalendarShare(enabled: $enabled, mode: $mode) {
+      enabled
+      mode
+      token
+    }
+  }
+`;
+
+export const REGENERATE_CALENDAR_SHARE_TOKEN = gql`
+  mutation RegenerateCalendarShareToken {
+    regenerateCalendarShareToken {
+      enabled
+      mode
+      token
+    }
+  }
+`;

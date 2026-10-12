@@ -32,25 +32,32 @@ const SWIPE_MAX_HOLD_MS = 250;
 
 interface CalendarViewProps {
   events: CalendarEvent[];
+  /** No creating, dragging or resizing events (shared calendars). */
+  readOnly?: boolean;
+  /** Called instead of opening the detail panel when an event is clicked. */
+  onEventClick?: (id: string) => void;
 }
 
 /** FullCalendar's default event markup, with the event's icon before the title. */
 function renderEventContent(arg: EventContentArg) {
   const { event } = arg;
-  const { icon, location, description } = event.extendedProps as {
+  const { icon, location, description, hideIcon } = event.extendedProps as {
     icon?: string | null;
     location?: string;
     description?: string;
+    hideIcon?: boolean;
   };
   return (
     <div className="fc-event-main-frame">
       {arg.timeText && <div className="fc-event-time">{arg.timeText}</div>}
       <div className="fc-event-title-container">
         <div className="fc-event-title fc-sticky">
-          <EventIcon
-            event={{ icon, title: event.title, location, description }}
-            className="mr-1 h-[1.1em] w-[1.1em] align-[-0.2em]"
-          />
+          {!hideIcon && (
+            <EventIcon
+              event={{ icon, title: event.title, location, description }}
+              className="mr-1 h-[1.1em] w-[1.1em] align-[-0.2em]"
+            />
+          )}
           {event.title || '\u00a0'}
         </div>
       </div>
@@ -63,7 +70,7 @@ function renderEventContent(arg: EventContentArg) {
  * Listens for calendar-nav CustomEvents from the Header for prev/next navigation,
  * and for horizontal touch swipes that do the same on mobile.
  */
-export function CalendarView({ events }: CalendarViewProps) {
+export function CalendarView({ events, readOnly = false, onEventClick }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
@@ -175,9 +182,10 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
-      dispatch(setSelectedEventId(info.event.id));
+      if (onEventClick) onEventClick(info.event.id);
+      else dispatch(setSelectedEventId(info.event.id));
     },
-    [dispatch],
+    [dispatch, onEventClick],
   );
 
   const handleDateSelect = useCallback(
@@ -216,8 +224,8 @@ export function CalendarView({ events }: CalendarViewProps) {
         initialDate={selectedDate}
         events={events}
         headerToolbar={false}
-        editable={true}
-        selectable={true}
+        editable={!readOnly}
+        selectable={!readOnly}
         selectMirror={true}
         dayMaxEvents={3}
         // Render single-day timed events as filled pills in month view,
