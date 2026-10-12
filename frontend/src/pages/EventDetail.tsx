@@ -155,7 +155,7 @@ export function EventDetail() {
         {event.location && (
           <div className="flex items-start gap-3">
             <MapPin className="mt-1 h-5 w-5 shrink-0 text-primary" />
-            <p className="text-foreground">{event.location}</p>
+            <p className="min-w-0 flex-1 text-foreground wrap-anywhere">{event.location}</p>
           </div>
         )}
 
@@ -165,7 +165,7 @@ export function EventDetail() {
             <Separator />
             <div className="flex items-start gap-3">
               <AlignLeft className="mt-1 h-5 w-5 shrink-0 text-primary" />
-              <p className="whitespace-pre-wrap text-muted-foreground">
+              <p className="min-w-0 flex-1 whitespace-pre-wrap wrap-anywhere text-muted-foreground">
                 {event.description}
               </p>
             </div>
