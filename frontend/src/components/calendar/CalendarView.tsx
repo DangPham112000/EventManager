@@ -22,6 +22,14 @@ interface CalendarEvent {
   extendedProps?: Record<string, unknown>;
 }
 
+// Swipe gesture tuning: a swipe must travel far enough horizontally, be mostly
+// horizontal (so vertical scrolling is untouched) and start moving quickly, or
+// it is a long-press drag/select handled by FullCalendar (longPressDelay=300).
+const SWIPE_MIN_DISTANCE = 50;
+const SWIPE_MAX_SLOPE = 0.6; // max |dy| / |dx|
+const SWIPE_MOVE_TOLERANCE = 10;
+const SWIPE_MAX_HOLD_MS = 250;
+
 interface CalendarViewProps {
   events: CalendarEvent[];
 }
@@ -52,10 +60,12 @@ function renderEventContent(arg: EventContentArg) {
 
 /**
  * FullCalendar wrapper for the Month/Week/Day views (List is UpcomingList).
- * Listens for calendar-nav CustomEvents from the Header for prev/next navigation.
+ * Listens for calendar-nav CustomEvents from the Header for prev/next navigation,
+ * and for horizontal touch swipes that do the same on mobile.
  */
 export function CalendarView({ events }: CalendarViewProps) {
   const calendarRef = useRef<FullCalendar>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
   const calendarView = useAppSelector((s) => s.ui.calendarView);
   const selectedDate = useAppSelector((s) => s.ui.selectedDate);
@@ -97,6 +107,72 @@ export function CalendarView({ events }: CalendarViewProps) {
     return () => window.removeEventListener('calendar-nav', handler);
   }, []);
 
+  // Touch swipe: left = next, right = prev (same as the Header buttons)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let start: { x: number; y: number; time: number } | null = null;
+    let longPress = false;
+    let moved = false;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) {
+        start = null;
+        return;
+      }
+      const t = e.touches[0];
+      start = { x: t.clientX, y: t.clientY, time: Date.now() };
+      longPress = false;
+      moved = false;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!start || moved) return;
+      if (e.touches.length !== 1) {
+        start = null;
+        return;
+      }
+      const t = e.touches[0];
+      const distance = Math.hypot(t.clientX - start.x, t.clientY - start.y);
+      if (distance > SWIPE_MOVE_TOLERANCE) {
+        moved = true;
+        // Finger held still before moving: FullCalendar drag or select
+        longPress = Date.now() - start.time > SWIPE_MAX_HOLD_MS;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!start) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - start.x;
+      const dy = t.clientY - start.y;
+      start = null;
+      if (longPress || Math.abs(dx) < SWIPE_MIN_DISTANCE) return;
+      if (Math.abs(dy) > Math.abs(dx) * SWIPE_MAX_SLOPE) return;
+
+      const api = calendarRef.current?.getApi();
+      if (!api) return;
+      if (dx < 0) api.next();
+      else api.prev();
+    };
+
+    const onTouchCancel = () => {
+      start = null;
+    };
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    el.addEventListener('touchcancel', onTouchCancel, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchCancel);
+    };
+  }, []);
+
   const handleEventClick = useCallback(
     (info: EventClickArg) => {
       dispatch(setSelectedEventId(info.event.id));
@@ -132,7 +208,7 @@ export function CalendarView({ events }: CalendarViewProps) {
   );
 
   return (
-    <div className="h-full overflow-auto [&_.fc]:h-full">
+    <div ref={containerRef} className="h-full overflow-auto [&_.fc]:h-full">
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
