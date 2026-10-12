@@ -56,7 +56,9 @@ function SharedEventSheet({ event, onClose }: { event: SharedEvent | null; onClo
               <div className="flex items-start gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-foreground">{formatTimeRange(event.startTime, event.endTime)}</p>
+                  {formatTimeRange(event.startTime, event.endTime).map((line) => (
+                    <p key={line} className="text-sm text-foreground">{line}</p>
+                  ))}
                   <p className="text-xs text-muted-foreground">{formatDuration(event.startTime, event.endTime)}</p>
                 </div>
               </div>
