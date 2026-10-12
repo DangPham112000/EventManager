@@ -34,6 +34,20 @@
 | `user`          | `User!`          | ✅       | The attendee                    |
 | `participation` | `Participation!` | ✅       | `JOINED` or `INTERESTED`        |
 
+### CalendarShare
+The signed-in user's read-only calendar link (`/share/:token`).
+
+| Field     | Type                 | Required | Description                                   |
+|-----------|----------------------|----------|-----------------------------------------------|
+| `enabled` | `Boolean!`           | ✅       | Whether the link works                        |
+| `mode`    | `CalendarShareMode!` | ✅       | `PRIVATE` (busy times only) or `PUBLIC` (all details) |
+| `token`   | `String`             | ❌       | Secret in the link; null until first enabled  |
+
+### SharedEvent
+An event as the share link shows it: `id`, `title`, `startTime`, `endTime`, `description`, `location`, `icon`, `participation`.
+In `PRIVATE` mode the server sends only the times: the title is `Busy`, the id is a placeholder and every other field is null.
+It never carries the creator or attendees.
+
 ## Queries
 
 | Query                  | Return Type  | Description                          |
@@ -42,6 +56,8 @@
 | `getEvents`            | `[Event!]!`  | Events the user created or attends   |
 | `getEvent(id: ID!, shareToken: String)` | `Event` | An event the user created or attends, or any event with its share token |
 | `apiKeys`              | `[ApiKey!]!` | Current user's MCP API keys          |
+| `calendarShare`        | `CalendarShare!` | Current user's calendar share settings |
+| `sharedCalendar(token: String!)` | `SharedCalendar` | `{ ownerName, mode, events: [SharedEvent!]! }` behind a share link; no sign-in needed; null when the link is unknown or turned off |
 
 ## Mutations
 
@@ -55,6 +71,8 @@
 | `leaveEvent(eventId: ID!)`                   | `Event!`       | Leave an event (not allowed for its creator) |
 | `createApiKey(name: String!)`                | `CreatedApiKey!` | Create an MCP API key (raw key returned once) |
 | `revokeApiKey(id: ID!)`                      | `Boolean!`     | Revoke one of the user's API keys    |
+| `updateCalendarShare(enabled: Boolean, mode: CalendarShareMode)` | `CalendarShare!` | Turn the calendar link on/off or change its mode; the first enable creates the token |
+| `regenerateCalendarShareToken`               | `CalendarShare!` | Replace the link; the old one stops working |
 
 ## MCP endpoint
 

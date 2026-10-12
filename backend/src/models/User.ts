@@ -7,6 +7,14 @@ const userSchema = new mongoose.Schema({
   clerkId: { type: String, unique: true, sparse: true },
   googleId: { type: String, unique: true, sparse: true },
   avatar: { type: String },
+  // Read-only link to the user's calendar (see calendarShare.ts).
+  calendarShare: {
+    enabled: { type: Boolean, default: false },
+    mode: { type: String, enum: ['PRIVATE', 'PUBLIC'], default: 'PRIVATE' },
+    token: { type: String },
+  },
 });
+
+userSchema.index({ 'calendarShare.token': 1 }, { unique: true, sparse: true });
 
 export const User = mongoose.model('User', userSchema);

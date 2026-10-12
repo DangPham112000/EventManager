@@ -5,6 +5,8 @@ import { RequireAuth } from './components/auth/RequireAuth';
 import { Dashboard } from './pages/Dashboard';
 import { EventDetail } from './pages/EventDetail';
 import { AiAgents } from './pages/AiAgents';
+import { CalendarSharing } from './pages/CalendarSharing';
+import { SharedCalendar } from './pages/SharedCalendar';
 import { SignInPage } from './pages/SignInPage';
 import { authEnabled } from './lib/auth';
 
@@ -19,6 +21,8 @@ function App() {
               <Route path="/sign-up/*" element={<SignInPage mode="sign-up" />} />
             </>
           )}
+          {/* Shared calendars are public: no sign-in needed */}
+          <Route path="/share/:token" element={<SharedCalendar />} />
           <Route
             element={
               <RequireAuth>
@@ -29,6 +33,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/ai-agents" element={<AiAgents />} />
+            <Route path="/sharing" element={<CalendarSharing />} />
           </Route>
         </Routes>
       </ClerkWithRouter>

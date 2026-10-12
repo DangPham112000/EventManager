@@ -10,15 +10,18 @@ interface UpcomingEvent {
   start: string;
   end: string;
   extendedProps?: {
-    participation?: 'JOINED' | 'INTERESTED';
+    participation?: 'JOINED' | 'INTERESTED' | null;
     location?: string;
     description?: string;
     icon?: string | null;
+    hideIcon?: boolean;
   };
 }
 
 interface UpcomingListProps {
   events: UpcomingEvent[];
+  /** Called instead of opening the detail panel when an event is clicked. */
+  onSelect?: (id: string) => void;
 }
 
 interface DayGroup {
@@ -57,7 +60,7 @@ function spanDays(start: Date, end: Date) {
  * Multi-day events stay a single row showing their full date range,
  * grouped under the day they start (or today, if already in progress).
  */
-export function UpcomingList({ events }: UpcomingListProps) {
+export function UpcomingList({ events, onSelect }: UpcomingListProps) {
   const dispatch = useAppDispatch();
 
   const groups = useMemo(() => {
@@ -103,12 +106,13 @@ export function UpcomingList({ events }: UpcomingListProps) {
           <ul>
             {group.items.map(({ event, start, end }) => {
               const days = spanDays(start, end);
-              const interested = event.extendedProps?.participation === 'INTERESTED';
+              const participation = event.extendedProps?.participation;
+              const interested = participation === 'INTERESTED';
               const location = event.extendedProps?.location;
               return (
                 <li key={event.id}>
                   <button
-                    onClick={() => dispatch(setSelectedEventId(event.id))}
+                    onClick={() => (onSelect ? onSelect(event.id) : dispatch(setSelectedEventId(event.id)))}
                     className="flex w-full items-start gap-3 border-b border-border/60 px-4 py-2.5 text-left text-sm transition-colors hover:bg-accent no-select"
                   >
                     <span className="w-36 shrink-0 text-xs leading-5 text-muted-foreground sm:w-80 sm:text-sm">
@@ -118,18 +122,24 @@ export function UpcomingList({ events }: UpcomingListProps) {
                         `${formatTime(start)} - ${formatTime(end)}`
                       )}
                     </span>
-                    <span
-                      className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-                        interested ? 'border-[1.5px] border-dashed border-primary' : 'bg-primary'
-                      }`}
-                      aria-label={interested ? 'Interested' : 'Joined'}
-                    />
+                    {participation ? (
+                      <span
+                        className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
+                          interested ? 'border-[1.5px] border-dashed border-primary' : 'bg-primary'
+                        }`}
+                        aria-label={interested ? 'Interested' : 'Joined'}
+                      />
+                    ) : (
+                      <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground/50" />
+                    )}
                     <span className="min-w-0 flex-1">
                       <span className="font-medium">
-                        <EventIcon
-                          event={{ ...event.extendedProps, title: event.title }}
-                          className="mr-1.5 h-4 w-4 align-[-0.2em] text-primary"
-                        />
+                        {!event.extendedProps?.hideIcon && (
+                          <EventIcon
+                            event={{ ...event.extendedProps, title: event.title }}
+                            className="mr-1.5 h-4 w-4 align-[-0.2em] text-primary"
+                          />
+                        )}
                         {event.title}
                       </span>
                       {days > 1 && (
