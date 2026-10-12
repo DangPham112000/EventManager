@@ -81,7 +81,7 @@ export function EventDetailPanel() {
             <SheetHeader className="shrink-0 px-4 pt-4 pb-2">
               {/* Color accent bar */}
               <div className="mb-2 h-1 w-12 rounded-full bg-primary" />
-              <SheetTitle className="text-left text-lg leading-snug">
+              <SheetTitle className="text-left text-lg leading-snug wrap-anywhere">
                 <EventIcon event={event} className="mr-2 h-5 w-5 align-[-0.2em] text-primary" />
                 {event.title}
               </SheetTitle>
@@ -96,7 +96,7 @@ export function EventDetailPanel() {
             </SheetHeader>
 
             {/* Body scrolls on its own so a long description never pushes the header away */}
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-4 pb-4">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-4">
               {/* Time */}
               <div className="flex items-start gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -116,7 +116,7 @@ export function EventDetailPanel() {
               {event.location && (
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                  <p className="text-sm text-foreground">{event.location}</p>
+                  <p className="min-w-0 flex-1 text-sm text-foreground wrap-anywhere">{event.location}</p>
                 </div>
               )}
 
@@ -124,7 +124,7 @@ export function EventDetailPanel() {
               {event.description && (
                 <div className="flex items-start gap-3">
                   <AlignLeft className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  <p className="min-w-0 flex-1 whitespace-pre-wrap wrap-anywhere text-sm text-muted-foreground">
                     {event.description}
                   </p>
                 </div>
