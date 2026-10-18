@@ -92,6 +92,8 @@ export function EventModal() {
   });
 
   // Pre-fill form when editing or when selected date changes (for create)
+  // TODO: derive the initial form from props/query data instead of syncing it here.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (isEditing && eventData?.getEvent) {
       const evt = eventData.getEvent;
@@ -123,6 +125,7 @@ export function EventModal() {
     }
     setErrors({});
   }, [isEditing, eventData, isOpen, selectedDate]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const [createEvent, { loading: creating }] = useMutation(CREATE_EVENT, {
     refetchQueries: [{ query: GET_EVENTS }],

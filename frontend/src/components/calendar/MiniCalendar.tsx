@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedDate } from '@/store/uiSlice';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -19,25 +18,22 @@ export function MiniCalendar() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const days = useMemo(() => {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startOffset = firstDay.getDay(); // 0=Sun
+  // At most 37 cells, cheap enough to rebuild on every render.
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startOffset = firstDay.getDay(); // 0=Sun
 
-    const cells: (Date | null)[] = [];
+  const days: (Date | null)[] = [];
 
-    // Leading empty cells
-    for (let i = 0; i < startOffset; i++) {
-      cells.push(null);
-    }
+  // Leading empty cells
+  for (let i = 0; i < startOffset; i++) {
+    days.push(null);
+  }
 
-    // Days of month
-    for (let d = 1; d <= lastDay.getDate(); d++) {
-      cells.push(new Date(year, month, d));
-    }
-
-    return cells;
-  }, [year, month]);
+  // Days of month
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    days.push(new Date(year, month, d));
+  }
 
   const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
