@@ -26,6 +26,12 @@ Browser ─HTTPS─▶ Cloudflare (proxied, SSL mode "Flexible")
   serves the SPA (all routes → `index.html`) and proxies `/graphql`, `/mcp` and
   `/.well-known/oauth-*` to the backend.
 
+## PR checks (GitHub Actions, `.github/workflows/ci.yml`)
+
+Runs on every pull request: frontend lint, `tsc -b` and `vite build`; backend
+`tsc --noEmit` and tests; and a Docker build of both images without pushing.
+Mark these jobs as required checks on `main` so a broken build cannot be merged.
+
 ## CI/CD Pipeline (GitHub Actions, `.github/workflows/deploy.yml`)
 
 Runs on push to `main` (changes to `*.md` and `.agents/**` only do not deploy) or by
