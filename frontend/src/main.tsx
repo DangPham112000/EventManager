@@ -7,10 +7,6 @@ import { apolloClient } from './lib/apolloClient';
 import App from './App';
 import './index.css';
 
-// TEMP (DAN-102): deliberate type error to prove the ruleset blocks merging.
-const rulesetProbe: number = 'not a number';
-void rulesetProbe;
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ApolloProvider client={apolloClient}>
