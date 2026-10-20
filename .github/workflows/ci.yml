@@ -12,6 +12,9 @@ concurrency:
 permissions:
   contents: read
 
+# The job names below are required status checks in the "main" branch ruleset
+# (Settings > Rules > Rulesets). Renaming a job means updating that ruleset too,
+# or every pull request will wait forever for a check that never reports.
 jobs:
   frontend:
     name: Frontend (lint, typecheck, build)
