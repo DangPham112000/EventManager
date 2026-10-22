@@ -42,18 +42,22 @@ hand (`workflow_dispatch`):
 2. **Copy** `docker-compose.yml` and `nginx/` to `/opt/event-manager` over SCP.
 3. **SSH** in as the `deploy` user, log in to GHCR with a project-local
    `DOCKER_CONFIG` (`/opt/event-manager/.docker`, so other stacks' docker login is
-   untouched), then `docker compose pull` and `docker compose up -d --remove-orphans`.
+   untouched), then `docker compose pull` and
+   `doppler run -- docker compose up -d --remove-orphans`.
 4. **Cleanup** with `docker image prune -f`: removes only dangling images. Never use
    `docker image prune -a`, which would also delete images other stacks on the VPS
    still need and the layer cache that keeps pulls fast.
 
 ## Configuration
 
+- App secrets live in **Doppler**, project `event-manager`, config `prd`
+  (`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`,
+  `CLERK_AUTHORIZED_PARTIES`, `PUBLIC_URL`). Never put them in GitHub or `.env` files.
 - GitHub Actions **secrets**: `VPS_HOST`, `VPS_USERNAME` (`deploy`), `VPS_SSH_KEY`,
-  `GH_PAT` (GHCR push/pull), `CLERK_SECRET_KEY`.
-- GitHub Actions **variable**: `CLERK_PUBLISHABLE_KEY` (baked into the frontend build).
-- Server-side `/opt/event-manager/.env` (read by `docker compose`): `IMAGE_PREFIX`,
-  `APP_PORT`, `PUBLIC_URL`, `CLERK_AUTHORIZED_PARTIES`, and optionally the Clerk keys
-  for running compose by hand.
+  `GH_PAT` (GHCR push/pull), `DOPPLER_TOKEN` (read-only service token, used by the
+  frontend build).
+- VPS: the `deploy` user has its own read-only Doppler service token scoped to
+  `/opt/event-manager`. `/opt/event-manager/.env` holds only non-secret settings
+  (`IMAGE_PREFIX`, `APP_PORT`).
 - Never commit secrets, the VPS IP or personal emails. The repo is public; use
   `.env.example` as the template.

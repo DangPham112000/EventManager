@@ -50,8 +50,8 @@ The project follows a standard decoupled Client-Server architecture utilizing Gr
 
 Sign-in uses [Clerk](https://clerk.com) (enable Google under *User & authentication → SSO connections*).
 
-- **Frontend:** `VITE_CLERK_PUBLISHABLE_KEY` in `frontend/.env.local` (dev) or the `CLERK_PUBLISHABLE_KEY` GitHub Actions **variable** (production build). Without it the app runs with no sign-in.
-- **Backend:** `CLERK_SECRET_KEY` in `backend/.env` (dev) or the `CLERK_SECRET_KEY` GitHub Actions **secret** (production). It verifies the session token sent as `Authorization: Bearer …`.
+- **Frontend:** `VITE_CLERK_PUBLISHABLE_KEY` in `frontend/.env.local` (dev) or in Doppler (production build, see [Secrets](#secrets-doppler)). Without it the app runs with no sign-in.
+- **Backend:** `CLERK_SECRET_KEY` in `backend/.env` (dev) or in Doppler (production). It verifies the session token sent as `Authorization: Bearer …`.
 - On first sign-in a Clerk user is linked to the existing user with the same email, or a new user is created.
 - `USE_MOCK=true` skips auth entirely and acts as the seed user.
 
@@ -127,10 +127,15 @@ Browser ─HTTPS─▶ Cloudflare (proxied, SSL "Flexible")
    APP_PORT=8080
    PUBLIC_URL=https://events.dantepham.site
    CLERK_AUTHORIZED_PARTIES=https://events.dantepham.site
-   # Optional: only needed to run `docker compose up` by hand. CI passes these itself.
-   CLERK_SECRET_KEY=sk_live_...
-   CLERK_PUBLISHABLE_KEY=pk_live_...
    ```
+   Keep secrets out of this file; they come from Doppler (next step).
+5. **Doppler.** Install the [Doppler CLI](https://docs.doppler.com/docs/install-cli), create a read-only service token for project `event-manager`, config `prd`, and store it for the `deploy` user, scoped to the app folder:
+   ```bash
+   export HISTIGNORE='doppler*'
+   echo 'dp.st.prd.xxxx' | sudo -u deploy doppler configure set token --scope /opt/event-manager
+   sudo -u deploy sh -c 'cd /opt/event-manager && doppler secrets --only-names'
+   ```
+   To run compose by hand: `cd /opt/event-manager && doppler run -- docker compose up -d`.
 
 ### GitHub Actions configuration
 
@@ -142,12 +147,15 @@ Settings → Secrets and variables → Actions:
 | `VPS_USERNAME` | secret | `deploy` |
 | `VPS_SSH_KEY` | secret | Private key whose public half is in `deploy`'s `authorized_keys` |
 | `GH_PAT` | secret | Personal access token with `write:packages` (push and pull GHCR images) |
-| `CLERK_SECRET_KEY` | secret | Clerk secret key (backend) |
-| `CLERK_PUBLISHABLE_KEY` | variable | Clerk publishable key (inlined into the frontend build) |
+| `DOPPLER_TOKEN` | secret | Read-only Doppler service token for `event-manager` / `prd` (a separate token from the VPS one) |
+
+### Secrets (Doppler)
+
+App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY` (`${CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES`, `PUBLIC_URL`. The frontend build reads `VITE_CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN`; the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
 
 ### What a deploy does
 
-Every push to `main` (except changes that only touch Markdown or `.agents/`) runs `.github/workflows/deploy.yml`; it can also be started by hand from the Actions tab. It builds and pushes both images to GHCR, copies `docker-compose.yml` and `nginx/` to `/opt/event-manager`, then over SSH logs in to GHCR with a project-local `DOCKER_CONFIG` (so other stacks' credentials are untouched), runs `docker compose pull` and `docker compose up -d --remove-orphans`, and finally `docker image prune -f`.
+Every push to `main` (except changes that only touch Markdown or `.agents/`) runs `.github/workflows/deploy.yml`; it can also be started by hand from the Actions tab. It builds and pushes both images to GHCR, copies `docker-compose.yml` and `nginx/` to `/opt/event-manager`, then over SSH logs in to GHCR with a project-local `DOCKER_CONFIG` (so other stacks' credentials are untouched), runs `docker compose pull` and `doppler run -- docker compose up -d --remove-orphans` (it stops first if Doppler is not set up for the `deploy` user), and finally `docker image prune -f`.
 
 The prune removes only **dangling** images (old layers left untagged by the new pull). It deliberately does not use `-a`, which would also delete images that other projects on the VPS rely on and the cached layers that keep the next pull fast.
 
