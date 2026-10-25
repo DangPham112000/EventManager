@@ -82,6 +82,14 @@ async function getUserByClerkId(clerkId: string): Promise<IUser | null> {
     clerkUser.username ||
     email.split('@')[0];
 
+  // Overwrites an older clerkId on purpose: when the Clerk application changes
+  // (DAN-100, moving to the shared ecosystem app), users get new Clerk ids and are
+  // relinked to their existing data by email.
+  const previous = await User.findOne({ email }, { clerkId: 1 });
+  if (previous?.clerkId && previous.clerkId !== clerkId) {
+    console.log(`Relinking user ${previous._id} from Clerk id ${previous.clerkId} to ${clerkId}`);
+  }
+
   const user = await User.findOneAndUpdate(
     { email },
     {

@@ -48,18 +48,18 @@ The project follows a standard decoupled Client-Server architecture utilizing Gr
 
 ## Authentication (Clerk)
 
-Sign-in uses [Clerk](https://clerk.com) (enable Google under *User & authentication → SSO connections*).
+Sign-in uses the ecosystem's shared [Clerk](https://clerk.com) application `yolo-ecosystem` (production instance on `dantepham.site`), so one session works across all `*.dantepham.site` apps. Its keys live in Doppler `shared/prd`.
 
 - **Frontend:** `VITE_CLERK_PUBLISHABLE_KEY` in `frontend/.env.local` (dev) or in Doppler (production build, see [Secrets](#secrets-doppler)). Without it the app runs with no sign-in.
 - **Backend:** `CLERK_SECRET_KEY` in `backend/.env` (dev) or in Doppler (production). It verifies the session token sent as `Authorization: Bearer …`.
-- On first sign-in a Clerk user is linked to the existing user with the same email, or a new user is created.
+- On first sign-in a Clerk user is linked to the existing user with the same email, or a new user is created. A stored `clerkId` from an older Clerk app is overwritten, which is how users were moved to the shared app (DAN-100).
 - `USE_MOCK=true` skips auth entirely and acts as the seed user.
 
 ## AI agents (MCP)
 
 The backend serves an [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` (Streamable HTTP, stateless), so AI agents can manage a user's calendar from a prompt.
 
-**Sign in with OAuth (easiest).** In Gemini, claude.ai, ChatGPT or Claude Desktop, add a custom connector with the URL `https://events.dantepham.site/mcp`. The client finds Clerk through `/.well-known/oauth-protected-resource/mcp`, registers itself, and sends the user through Clerk sign-in and consent; `/mcp` then accepts the Clerk OAuth access token. This needs **Dynamic client registration** turned on in the Clerk dashboard (Configure → OAuth applications) and `CLERK_PUBLISHABLE_KEY` set on the backend.
+**Sign in with OAuth (easiest).** In Gemini, claude.ai, ChatGPT or Claude Desktop, add a custom connector with the URL `https://events.dantepham.site/mcp`. The client finds Clerk through `/.well-known/oauth-protected-resource/mcp`, registers itself, and sends the user through Clerk sign-in and consent; `/mcp` then accepts the Clerk OAuth access token. This needs **Dynamic client registration** turned on in the Clerk dashboard (Configure → OAuth applications) and `CLERK_PUBLISHABLE_KEY` set on the backend. OAuth tokens belong to one Clerk app, so after Event Manager moved to the shared Clerk app (DAN-100) connectors that signed in with OAuth must be connected again; API keys keep working.
 
 **API key (for clients that cannot sign in, e.g. Claude Code or Cursor).**
 
@@ -151,7 +151,7 @@ Settings → Secrets and variables → Actions:
 
 ### Secrets (Doppler)
 
-App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY` (`${CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES`, `PUBLIC_URL`. The frontend build reads `VITE_CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN`; the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
+App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY` (`${shared.prd.CLERK_SECRET_KEY}`), `CLERK_PUBLISHABLE_KEY` (`${shared.prd.CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES` (only `https://events.dantepham.site`, so session tokens from other ecosystem apps are refused), `PUBLIC_URL`. The frontend build reads `CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN` and passes it as `VITE_CLERK_PUBLISHABLE_KEY` (there is no `VITE_` copy in Doppler, because Doppler does not allow a reference to a reference); the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
 
 ### What a deploy does
 

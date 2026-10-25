@@ -11,7 +11,7 @@ import type { Request, Response } from 'express';
  */
 
 // Clerk's Frontend API URL is encoded in the publishable key:
-// pk_test_<base64("measured-marmot-2690.clerk.accounts.dev$")>.
+// pk_live_<base64("clerk.dantepham.site$")> for the shared ecosystem Clerk app.
 function clerkIssuerUrl(): string | null {
   const key = process.env.CLERK_PUBLISHABLE_KEY;
   const match = key?.match(/^pk_(test|live)_(.+)$/);
