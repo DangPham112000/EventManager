@@ -95,7 +95,7 @@ Browser ─HTTPS─▶ Cloudflare (proxied, SSL "Flexible")
    sudo adduser --disabled-password --gecos "" deploy
    sudo usermod -aG docker deploy
    sudo mkdir -p /opt/event-manager && sudo chown deploy:deploy /opt/event-manager
-   # Append the public half of the key stored in the VPS_SSH_KEY secret:
+   # Append the public half of the key stored in Doppler as VPS_SSH_KEY:
    sudo -u deploy mkdir -p /home/deploy/.ssh
    sudo -u deploy tee -a /home/deploy/.ssh/authorized_keys < ci_deploy_key.pub
    ```
@@ -139,19 +139,17 @@ Browser ─HTTPS─▶ Cloudflare (proxied, SSL "Flexible")
 
 ### GitHub Actions configuration
 
-Settings → Secrets and variables → Actions:
+Settings → Secrets and variables → Actions holds a single secret:
 
 | Name | Kind | Value |
 | --- | --- | --- |
-| `VPS_HOST` | secret | VPS IP or hostname |
-| `VPS_USERNAME` | secret | `deploy` |
-| `VPS_SSH_KEY` | secret | Private key whose public half is in `deploy`'s `authorized_keys` |
-| `GH_PAT` | secret | Personal access token with `write:packages` (push and pull GHCR images) |
 | `DOPPLER_TOKEN` | secret | Read-only Doppler service token for `event-manager` / `prd` (a separate token from the VPS one) |
+
+Everything else the workflow needs is in Doppler (next section), so values can be read again when needed. GHCR pushes and the VPS pull use the job's own `GITHUB_TOKEN`, which expires when the job ends; there is no personal access token. If GHCR refuses it with a 403, open the package on GitHub → Package settings → Manage Actions access, and give this repository the Write role.
 
 ### Secrets (Doppler)
 
-App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY` (`${shared.prd.CLERK_SECRET_KEY}`), `CLERK_PUBLISHABLE_KEY` (`${shared.prd.CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES` (only `https://events.dantepham.site`, so session tokens from other ecosystem apps are refused), `PUBLIC_URL`. The frontend build reads `CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN` and passes it as `VITE_CLERK_PUBLISHABLE_KEY` (there is no `VITE_` copy in Doppler, because Doppler does not allow a reference to a reference); the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
+App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY` (`${shared.prd.CLERK_SECRET_KEY}`), `CLERK_PUBLISHABLE_KEY` (`${shared.prd.CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES` (only `https://events.dantepham.site`, so session tokens from other ecosystem apps are refused), `PUBLIC_URL`, and the deploy job's SSH settings `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY` (references to `${shared.prd.*}`, the same for every app; masked in the logs). The frontend build reads `CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN` and passes it as `VITE_CLERK_PUBLISHABLE_KEY` (there is no `VITE_` copy in Doppler, because Doppler does not allow a reference to a reference); the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
 
 ### What a deploy does
 
