@@ -7,7 +7,8 @@ export function newShareToken(): string {
 
 const attendeeSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // Clerk user id; name and avatar come from core.users (DAN-92).
+    user: { type: String, required: true },
     participation: { type: String, enum: ['JOINED', 'INTERESTED'], default: 'JOINED' },
   },
   { _id: false },
@@ -22,7 +23,8 @@ const eventSchema = new mongoose.Schema({
   location: { type: String },
   // A key from EVENT_ICONS; unset means the app suggests one from the title.
   icon: { type: String },
-  creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  // Clerk user id of the creator.
+  creator: { type: String, required: true },
   // Each attendee's own participation; the creator is always one of them.
   attendees: [attendeeSchema],
   shareToken: { type: String, default: newShareToken },

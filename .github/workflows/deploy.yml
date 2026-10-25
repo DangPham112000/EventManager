@@ -168,7 +168,7 @@ jobs:
           host: ${{ env.VPS_HOST }}
           username: ${{ env.VPS_USERNAME }}
           key: ${{ env.VPS_SSH_KEY }}
-          source: "docker-compose.yml,nginx/,scripts/migrate-to-shared-mongo.sh"
+          source: "docker-compose.yml,nginx/,scripts/migrate-to-shared-mongo.sh,scripts/backup-db.sh"
           target: "/opt/event-manager"
 
       - name: Deploy and Restart Services on VPS
@@ -222,6 +222,9 @@ jobs:
             # to the shared instance, with a dump kept in backups/. No-op once the old container
             # is gone; on failure it restarts the old backend and the deploy stops here.
             doppler run -- bash scripts/migrate-to-shared-mongo.sh
+
+            # One-time dump before the backend that moves user references to Clerk ids (DAN-92).
+            doppler run -- bash scripts/backup-db.sh pre-dan-92
 
             # Restart services with the secrets from Doppler in the environment,
             # where docker compose fills in ${CLERK_SECRET_KEY} and the rest.

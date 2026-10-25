@@ -3,13 +3,15 @@
 ## Entities
 
 ### User
+
+Read from the shared `core.users` (ecosystem-infra, DAN-92); Event Manager stores only the Clerk id.
+
 | Field      | Type     | Required | Description         |
 |------------|----------|----------|---------------------|
-| `id`       | `ID!`    | ✅       | Unique identifier   |
+| `id`       | `ID!`    | ✅       | Clerk user id       |
 | `email`    | `String!`| ✅       | User email address  |
 | `name`     | `String!`| ✅       | Display name        |
 | `avatar`   | `String` | ❌       | Profile avatar URL  |
-| `googleId` | `String!`| ✅       | Google OAuth ID     |
 
 ### Event
 | Field           | Type       | Required | Description                         |

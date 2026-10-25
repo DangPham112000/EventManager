@@ -5,7 +5,6 @@ export const typeDefs = `#graphql
     email: String!
     name: String!
     avatar: String
-    googleId: String
   }
 
   enum Participation {
