@@ -1,8 +1,7 @@
 import type { IDataSource, IUser, IEvent, CreateEventInput, UpdateEventInput, Participation } from './types.js';
 import mongoose from 'mongoose';
 import { Event } from '../models/Event.js';
-
-const POPULATE = ['creator', 'attendees.user'];
+import { findCoreUsers } from '../coreUsers.js';
 
 /**
  * MongoDB/Mongoose data source.
@@ -11,7 +10,7 @@ const POPULATE = ['creator', 'attendees.user'];
 export const dbDataSource: IDataSource = {
   async getEvent(id: string): Promise<IEvent | null> {
     if (!mongoose.isValidObjectId(id)) return null;
-    const event = await Event.findById(id).populate(POPULATE);
+    const event = await Event.findById(id);
     if (!event) return null;
     return mapEvent(event);
   },
@@ -21,10 +20,8 @@ export const dbDataSource: IDataSource = {
       $or: [{ creator: userId }, { 'attendees.user': userId }],
       ...(to && { startTime: { $lt: to } }),
       ...(from && { endTime: { $gt: from } }),
-    })
-      .sort({ startTime: 1 })
-      .populate(POPULATE);
-    return events.map(mapEvent);
+    }).sort({ startTime: 1 });
+    return mapEvents(events);
   },
 
   async createEvent({ participation, ...input }: CreateEventInput, creator: IUser): Promise<IEvent> {
@@ -34,15 +31,14 @@ export const dbDataSource: IDataSource = {
       attendees: [{ user: creator.id, participation: participation ?? 'JOINED' }],
     });
 
-    const populated = await event.populate(POPULATE);
-    return mapEvent(populated);
+    return mapEvent(event);
   },
 
   async updateEvent(id: string, input: UpdateEventInput): Promise<IEvent | null> {
     if (!mongoose.isValidObjectId(id)) return null;
     const { icon, ...fields } = input;
     const update = icon === null ? { ...fields, $unset: { icon: '' } } : input;
-    const event = await Event.findByIdAndUpdate(id, update, { new: true }).populate(POPULATE);
+    const event = await Event.findByIdAndUpdate(id, update, { new: true });
     if (!event) return null;
     return mapEvent(event);
   },
@@ -60,13 +56,13 @@ export const dbDataSource: IDataSource = {
       { _id: id, 'attendees.user': user.id },
       { $set: { 'attendees.$.participation': participation } },
       { new: true },
-    ).populate(POPULATE);
+    );
     if (updated) return mapEvent(updated);
     const added = await Event.findOneAndUpdate(
       { _id: id, 'attendees.user': { $ne: user.id } },
       { $push: { attendees: { user: user.id, participation } } },
       { new: true },
-    ).populate(POPULATE);
+    );
     // Lost a race with a concurrent join: the user is attending now, so just set it again.
     if (!added) return (await Event.exists({ _id: id })) ? dbDataSource.joinEvent(id, user, participation) : null;
     return mapEvent(added);
@@ -78,26 +74,27 @@ export const dbDataSource: IDataSource = {
       id,
       { $pull: { attendees: { user: userId } } },
       { new: true },
-    ).populate(POPULATE);
+    );
     if (!event) return null;
     return mapEvent(event);
   },
 };
 
-function mapUser(doc: any): IUser {
-  return {
-    id: doc._id.toString(),
-    email: doc.email,
-    name: doc.name,
-    avatar: doc.avatar,
-    googleId: doc.googleId,
-  };
+async function mapEvent(doc: any): Promise<IEvent> {
+  return (await mapEvents([doc]))[0];
 }
 
 /**
- * Map a Mongoose document to the IEvent interface.
+ * Map Mongoose documents to IEvent, filling in creators and attendees from
+ * core.users with one query.
  */
-function mapEvent(doc: any): IEvent {
+async function mapEvents(docs: any[]): Promise<IEvent[]> {
+  const ids = docs.flatMap((doc) => [doc.creator, ...(doc.attendees || []).map((a: any) => a.user)]);
+  const users = await findCoreUsers(ids.filter(Boolean).map(String));
+  return docs.map((doc) => toEvent(doc, users));
+}
+
+function toEvent(doc: any, users: Map<string, IUser>): IEvent {
   return {
     id: doc._id.toString(),
     title: doc.title,
@@ -106,11 +103,10 @@ function mapEvent(doc: any): IEvent {
     endTime: doc.endTime instanceof Date ? doc.endTime.toISOString() : doc.endTime,
     location: doc.location,
     icon: doc.icon ?? undefined,
-    creator: mapUser(doc.creator),
+    creator: users.get(String(doc.creator))!,
     attendees: (doc.attendees || [])
-      // Skip attendees whose user was deleted.
       .filter((a: any) => a.user)
-      .map((a: any) => ({ user: mapUser(a.user), participation: a.participation ?? 'JOINED' })),
+      .map((a: any) => ({ user: users.get(String(a.user))!, participation: a.participation ?? 'JOINED' })),
     shareToken: doc.shareToken,
     googleEventId: doc.googleEventId,
   };

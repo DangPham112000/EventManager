@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
-import { User } from './models/User.js';
+import { UserSettings } from './models/UserSettings.js';
+import { findCoreUsers } from './coreUsers.js';
 import { getDataSource } from './data/index.js';
 import { participationOf } from './participation.js';
 import type { IEvent, IUser, Participation } from './data/types.js';
@@ -48,7 +49,7 @@ const mockShares = new Map<string, { user: IUser; share: CalendarShare }>();
 
 async function readShare(user: IUser): Promise<CalendarShare> {
   if (useMock()) return mockShares.get(user.id)?.share ?? DEFAULT_SHARE;
-  const doc = await User.findById(user.id, { calendarShare: 1 });
+  const doc = await UserSettings.findOne({ clerkId: user.id }, { calendarShare: 1 });
   const saved = doc?.calendarShare;
   return {
     enabled: saved?.enabled ?? false,
@@ -62,7 +63,7 @@ async function writeShare(user: IUser, share: CalendarShare): Promise<CalendarSh
     mockShares.set(user.id, { user, share });
     return share;
   }
-  await User.updateOne({ _id: user.id }, { $set: { calendarShare: share } });
+  await UserSettings.updateOne({ clerkId: user.id }, { $set: { calendarShare: share } }, { upsert: true });
   return share;
 }
 
@@ -100,10 +101,11 @@ async function findShareOwner(token: string): Promise<{ user: IUser; mode: Calen
     }
     return null;
   }
-  const doc = await User.findOne({ 'calendarShare.token': token, 'calendarShare.enabled': true });
+  const doc = await UserSettings.findOne({ 'calendarShare.token': token, 'calendarShare.enabled': true });
   if (!doc) return null;
+  const user = (await findCoreUsers([doc.clerkId])).get(doc.clerkId)!;
   return {
-    user: { id: doc._id.toString(), email: doc.email, name: doc.name },
+    user,
     mode: (doc.calendarShare?.mode as CalendarShareMode | undefined) ?? 'PRIVATE',
   };
 }

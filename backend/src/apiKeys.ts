@@ -1,8 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import mongoose from 'mongoose';
 import { ApiKey } from './models/ApiKey.js';
-import { User } from './models/User.js';
-import { toUser } from './auth.js';
+import { getUserByClerkId } from './auth.js';
 import { SEED_USER } from './data/mockData.js';
 import type { IUser } from './data/types.js';
 
@@ -86,6 +85,5 @@ export async function getUserFromApiKey(key: string | undefined): Promise<IUser 
 
   const doc = await ApiKey.findOneAndUpdate({ hash }, { $set: { lastUsedAt: new Date() } });
   if (!doc) return null;
-  const user = await User.findById(doc.user);
-  return user ? toUser(user) : null;
+  return getUserByClerkId(doc.user);
 }

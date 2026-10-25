@@ -9,7 +9,6 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  googleId: string;
 }
 
 export interface Attendee {

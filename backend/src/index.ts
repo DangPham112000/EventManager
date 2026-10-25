@@ -8,8 +8,8 @@ import { typeDefs } from './graphql/typeDefs.js';
 import { resolvers, type Context } from './graphql/resolvers.js';
 import { getUserFromAuthHeader } from './auth.js';
 import { SEED_USER } from './data/mockData.js';
-import { User } from './models/User.js';
 import { migrateEvents } from './models/Event.js';
+import { migrateUsersToClerkIds } from './migrateToClerkIds.js';
 import { handleMcpNotAllowed, handleMcpPost } from './mcp/http.js';
 import { authorizationServerMetadata, oauthIssuer, protectedResourceMetadata } from './mcp/oauth.js';
 
@@ -31,10 +31,8 @@ async function startServer() {
     }
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
-    // Replaces the old non-sparse unique googleId index, so users who sign in
-    // without Google (no googleId) do not collide on null.
-    await User.syncIndexes();
     await migrateEvents();
+    await migrateUsersToClerkIds();
   }
 
   if (!useMock && !process.env.CLERK_SECRET_KEY) {

@@ -9,7 +9,6 @@ export const SEED_USER: IUser = {
   email: 'dangpham@example.com',
   name: 'Dang Pham',
   avatar: undefined,
-  googleId: 'google-mock-001',
 };
 
 /** Another user, so joining and leaving can be tried in mock mode. */

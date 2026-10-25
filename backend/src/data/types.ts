@@ -5,7 +5,6 @@ export interface IUser {
   email: string;
   name: string;
   avatar?: string;
-  googleId?: string;
 }
 
 /** One user's participation in an event. */
