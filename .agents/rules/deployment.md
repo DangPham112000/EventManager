@@ -51,11 +51,11 @@ hand (`workflow_dispatch`):
 ## Configuration
 
 - App secrets live in **Doppler**, project `event-manager`, config `prd`
-  (`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `VITE_CLERK_PUBLISHABLE_KEY`,
-  `CLERK_AUTHORIZED_PARTIES`, `PUBLIC_URL`). Never put them in GitHub or `.env` files.
-- GitHub Actions **secrets**: `VPS_HOST`, `VPS_USERNAME` (`deploy`), `VPS_SSH_KEY`,
-  `GH_PAT` (GHCR push/pull), `DOPPLER_TOKEN` (read-only service token, used by the
-  frontend build).
+  (`CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY`, `CLERK_AUTHORIZED_PARTIES`, `PUBLIC_URL`,
+  and the deploy job's `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY`, which reference
+  `shared/prd`). Never put them in GitHub or `.env` files.
+- GitHub Actions has a single **secret**, `DOPPLER_TOKEN` (read-only service token for
+  `event-manager/prd`). GHCR push/pull uses the job's `GITHUB_TOKEN`; there is no PAT.
 - VPS: the `deploy` user has its own read-only Doppler service token scoped to
   `/opt/event-manager`. `/opt/event-manager/.env` holds only non-secret settings
   (`IMAGE_PREFIX`, `APP_PORT`).
