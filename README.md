@@ -9,7 +9,7 @@ The project follows a standard decoupled Client-Server architecture utilizing Gr
 *   **Frontend (FE):** A Single Page Application (SPA) built with React 19 and Vite. It uses Apollo Client to fetch data from the GraphQL backend and Redux Toolkit for local state management. UI components are styled using TailwindCSS and shadcn ui.
 *   **Backend (BE):** A Node.js server powered by Express and Apollo Server. It handles business logic, interacts with the MongoDB database, and communicates with Google APIs for Authentication and Calendar synchronization.
 *   **Database (DB):** MongoDB, a NoSQL database, is used to store user profiles, event details, and relationships (e.g., event attendees).
-*   **Deployment:** The frontend and backend are Docker images built by GitHub Actions and pushed to GHCR. On the VPS, Docker Compose runs the frontend (an nginx container that serves the static build and proxies API requests to the backend), the backend and MongoDB behind the host's nginx and Cloudflare. See [Deployment](#deployment).
+*   **Deployment:** The frontend and backend are Docker images built by GitHub Actions and pushed to GHCR. On the VPS, Docker Compose runs the frontend (an nginx container that serves the static build and proxies API requests to the backend) and the backend, with MongoDB on the ecosystem's shared instance, behind the host's nginx and Cloudflare. See [Deployment](#deployment).
 
 ## Project Structure
 
@@ -81,12 +81,12 @@ Production runs on a VPS shared with other projects, at `https://events.dantepha
 
 ```
 Browser ─HTTPS─▶ Cloudflare (proxied, SSL "Flexible")
-        ─HTTP:80─▶ host nginx ─▶ 127.0.0.1:8080 ─▶ frontend container ─▶ backend ─▶ mongodb
+        ─HTTP:80─▶ host nginx ─▶ 127.0.0.1:8080 ─▶ frontend container ─▶ backend ─▶ ecosystem-mongo (shared)
 ```
 
 - **Cloudflare** proxies the `events` DNS record (orange cloud) and terminates HTTPS. SSL/TLS mode is **Flexible**: Cloudflare reaches the VPS over plain HTTP on port 80.
 - **Host nginx** (installed on the VPS, not part of compose) owns port 80 and routes each hostname to its project. Event Manager goes to `127.0.0.1:8080`.
-- **Docker Compose** (project name `event-manager`) runs `frontend`, `backend` and `mongodb`. Only the frontend publishes a port, bound to `127.0.0.1`, so nothing in this stack is reachable from the internet except through the host nginx. `nginx/default.conf` is the frontend container's config, not the host's.
+- **Docker Compose** (project name `event-manager`) runs `frontend` and `backend`. MongoDB is the ecosystem's shared `ecosystem-mongo` instance (repo `ecosystem-infra`, DAN-90): the backend joins the external `ecosystem` network and logs in as the `event-manager` Mongo user with `MONGO_PASSWORD` from Doppler, which can only write the `event-manager` database. The one-time move from the old `mongodb` container is `scripts/migrate-to-shared-mongo.sh`, run by the deploy. Only the frontend publishes a port, bound to `127.0.0.1`, so nothing in this stack is reachable from the internet except through the host nginx. `nginx/default.conf` is the frontend container's config, not the host's.
 
 ### One-time VPS setup
 

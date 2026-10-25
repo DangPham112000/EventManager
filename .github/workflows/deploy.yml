@@ -168,7 +168,7 @@ jobs:
           host: ${{ env.VPS_HOST }}
           username: ${{ env.VPS_USERNAME }}
           key: ${{ env.VPS_SSH_KEY }}
-          source: "docker-compose.yml,nginx/"
+          source: "docker-compose.yml,nginx/,scripts/migrate-to-shared-mongo.sh"
           target: "/opt/event-manager"
 
       - name: Deploy and Restart Services on VPS
@@ -203,11 +203,29 @@ jobs:
               exit 1
             fi
 
-            # Pull new images
-            docker compose pull
+            # The backend uses the shared MongoDB (ecosystem-infra, DAN-90). Stop before changing
+            # anything if that stack or this app's Mongo password is missing.
+            if ! docker network inspect ecosystem > /dev/null 2>&1; then
+              echo "Network 'ecosystem' is missing: deploy the shared Mongo stack (ecosystem-infra) first." >&2
+              exit 1
+            fi
+            if [ -z "$(doppler secrets get MONGO_PASSWORD --plain)" ]; then
+              echo "MONGO_PASSWORD is missing in Doppler event-manager/prd." >&2
+              exit 1
+            fi
+
+            # Pull new images. Compose needs MONGO_PASSWORD even to read the file, so every
+            # compose call runs under Doppler.
+            doppler run -- docker compose pull
+
+            # One-time copy of the event-manager database from the stack's old Mongo container
+            # to the shared instance, with a dump kept in backups/. No-op once the old container
+            # is gone; on failure it restarts the old backend and the deploy stops here.
+            doppler run -- bash scripts/migrate-to-shared-mongo.sh
 
             # Restart services with the secrets from Doppler in the environment,
             # where docker compose fills in ${CLERK_SECRET_KEY} and the rest.
+            # --remove-orphans removes the old Mongo container; its volume stays until deleted by hand.
             doppler run -- docker compose up -d --remove-orphans
 
             # Prune dangling unused images (preserves layer cache for fast future pulls)
