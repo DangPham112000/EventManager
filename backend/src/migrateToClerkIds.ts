@@ -8,9 +8,12 @@ import { coreUsers } from './coreUsers.js';
  * user's Clerk id, and copies the calendar-share settings to `usersettings`.
  *
  * Safe to run on every start: once a user's references are rewritten, nothing matches
- * their _id any more, and settings are only inserted, never overwritten. The old
- * `users` collection is left in place and removed by hand once this has run in
- * production.
+ * their _id any more, and settings are only inserted, never overwritten.
+ *
+ * Once no event or API key points at an old user any more, the old `users` collection
+ * is dropped (verified in production on 2026-10-25; a dump from before the migration is
+ * in /opt/event-manager/backups/pre-dan-92.archive). If anything still points at it,
+ * it is kept and a warning is logged.
  */
 export async function migrateUsersToClerkIds(): Promise<void> {
   const db = mongoose.connection.db;
@@ -60,4 +63,15 @@ export async function migrateUsersToClerkIds(): Promise<void> {
         `${counts.apiKeys} API keys, ${counts.settings} calendar-share settings`,
     );
   }
+
+  const leftovers =
+    (await events.countDocuments({
+      $or: [{ creator: { $type: 'objectId' } }, { 'attendees.user': { $type: 'objectId' } }],
+    })) + (await apiKeys.countDocuments({ user: { $type: 'objectId' } }));
+  if (leftovers > 0) {
+    console.warn(`⚠️  ${leftovers} events or API keys still reference old users; keeping the users collection`);
+    return;
+  }
+  await db.collection('users').drop();
+  console.log(`🗑️  DAN-92: dropped the old users collection (${legacyUsers.length} users)`);
 }
