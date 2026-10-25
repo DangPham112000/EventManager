@@ -81,7 +81,11 @@ jobs:
             echo "::error::Set the DOPPLER_TOKEN repository secret (a read-only service token for event-manager/prd)."
             exit 1
           fi
-          KEY=$(doppler secrets get VITE_CLERK_PUBLISHABLE_KEY --plain)
+          # The backend uses the same publishable key, so Doppler keeps one variable
+          # (a reference to the shared Clerk app) and the frontend build gets it under
+          # its VITE_ name. A VITE_ copy in Doppler would be a chained reference, which
+          # Doppler does not allow.
+          KEY=$(doppler secrets get CLERK_PUBLISHABLE_KEY --plain)
           echo "VITE_CLERK_PUBLISHABLE_KEY=$KEY" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
