@@ -13,7 +13,7 @@ import type { IEvent } from '../src/data/types.js';
 const server = new ApolloServer<Context>({ typeDefs, resolvers });
 
 async function run(query: string, variables: Record<string, unknown>, user: Context['user']) {
-  const res = await server.executeOperation({ query, variables }, { contextValue: { user } });
+  const res = await server.executeOperation({ query, variables }, { contextValue: { user, fromOtherApp: false } });
   assert.equal(res.body.kind, 'single');
   if (res.body.kind !== 'single') throw new Error('unexpected incremental response');
   return res.body.singleResult;

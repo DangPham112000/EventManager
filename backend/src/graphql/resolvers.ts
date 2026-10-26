@@ -16,6 +16,8 @@ import {
 
 export interface Context {
   user: IUser | null;
+  /** The session token was issued to another ecosystem app, not to Event Manager itself. */
+  fromOtherApp: boolean;
 }
 
 function requireUser(ctx: Context): IUser {
@@ -23,6 +25,19 @@ function requireUser(ctx: Context): IUser {
     throw new GraphQLError('You must be signed in', { extensions: { code: 'UNAUTHENTICATED' } });
   }
   return ctx.user;
+}
+
+/**
+ * For things that stay valid long after a session token expires (API keys, the calendar share
+ * link): only Event Manager's own pages may touch them, so a bug in another ecosystem app cannot
+ * be used to take one. Other apps get events and conflicts only.
+ */
+function requireOwnApp(ctx: Context): IUser {
+  const user = requireUser(ctx);
+  if (ctx.fromOtherApp) {
+    throw new GraphQLError('Only Event Manager itself can do this', { extensions: { code: 'FORBIDDEN' } });
+  }
+  return user;
 }
 
 function sameToken(a: string, b: string): boolean {
@@ -89,9 +104,9 @@ export const resolvers = {
       return event && canSee(event, user, shareToken) ? event : null;
     },
 
-    apiKeys: async (_: unknown, __: unknown, ctx: Context) => listApiKeys(requireUser(ctx)),
+    apiKeys: async (_: unknown, __: unknown, ctx: Context) => listApiKeys(requireOwnApp(ctx)),
 
-    calendarShare: async (_: unknown, __: unknown, ctx: Context) => getCalendarShare(requireUser(ctx)),
+    calendarShare: async (_: unknown, __: unknown, ctx: Context) => getCalendarShare(requireOwnApp(ctx)),
 
     // Public: anyone with the link may read it, signed in or not.
     sharedCalendar: async (_: unknown, { token }: { token: string }) => getSharedCalendar(token),
@@ -179,18 +194,18 @@ export const resolvers = {
     },
 
     createApiKey: async (_: unknown, { name }: { name: string }, ctx: Context) =>
-      createApiKey(requireUser(ctx), name),
+      createApiKey(requireOwnApp(ctx), name),
 
     revokeApiKey: async (_: unknown, { id }: { id: string }, ctx: Context) =>
-      revokeApiKey(requireUser(ctx), id),
+      revokeApiKey(requireOwnApp(ctx), id),
 
     updateCalendarShare: async (
       _: unknown,
       change: { enabled?: boolean | null; mode?: CalendarShareMode | null },
       ctx: Context,
-    ) => updateCalendarShare(requireUser(ctx), change),
+    ) => updateCalendarShare(requireOwnApp(ctx), change),
 
     regenerateCalendarShareToken: async (_: unknown, __: unknown, ctx: Context) =>
-      regenerateCalendarShareToken(requireUser(ctx)),
+      regenerateCalendarShareToken(requireOwnApp(ctx)),
   },
 };
