@@ -29,8 +29,12 @@ services:
       - CLERK_PUBLISHABLE_KEY=${CLERK_PUBLISHABLE_KEY:-}
       - PUBLIC_URL=${PUBLIC_URL:-https://events.dantepham.site}
     networks:
-      - default
-      - ecosystem
+      default:
+      ecosystem:
+        # Stable name for other ecosystem apps calling this API server to server
+        # (Journei, DAN-95). Every stack has a service called "backend", so that name is ambiguous here.
+        aliases:
+          - event-manager-backend
     # No published port: the frontend nginx reaches it over the internal network.
 
 networks:

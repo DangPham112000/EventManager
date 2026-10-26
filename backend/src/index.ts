@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { typeDefs } from './graphql/typeDefs.js';
 import { resolvers, type Context } from './graphql/resolvers.js';
-import { getUserFromAuthHeader } from './auth.js';
+import { getSessionFromAuthHeader } from './auth.js';
 import { SEED_USER } from './data/mockData.js';
 import { migrateEvents } from './models/Event.js';
 import { migrateUsersToClerkIds } from './migrateToClerkIds.js';
@@ -57,8 +57,9 @@ async function startServer() {
     expressMiddleware(server, {
       context: async ({ req }): Promise<Context> => {
         // Mock mode has no Clerk: everyone is the seed user.
-        if (useMock) return { user: SEED_USER };
-        return { user: await getUserFromAuthHeader(req.headers.authorization) };
+        if (useMock) return { user: SEED_USER, fromOtherApp: false };
+        const session = await getSessionFromAuthHeader(req.headers.authorization);
+        return { user: session?.user ?? null, fromOtherApp: session?.fromOtherApp ?? false };
       },
     }),
   );

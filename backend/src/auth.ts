@@ -11,23 +11,36 @@ const authorizedParties = process.env.CLERK_AUTHORIZED_PARTIES?.split(',')
   .map((s) => s.trim())
   .filter(Boolean);
 
+// Event Manager's own origin. Session tokens issued to any other ecosystem app (their "azp")
+// may only use the operations other apps need, see requireOwnApp in graphql/resolvers.ts.
+const ownOrigin = new URL(process.env.PUBLIC_URL || 'https://events.dantepham.site').origin;
+
+export interface Session {
+  user: IUser;
+  /** True when the token was issued to another ecosystem app (e.g. Journei calling server to server). */
+  fromOtherApp: boolean;
+}
+
 /**
  * Resolve the signed-in user from an "Authorization: Bearer <Clerk session token>" header.
  * Returns null when the header is missing or the token is invalid.
  */
-export async function getUserFromAuthHeader(header: string | undefined): Promise<IUser | null> {
+export async function getSessionFromAuthHeader(header: string | undefined): Promise<Session | null> {
   if (!clerk || !header?.startsWith('Bearer ')) return null;
   const token = header.slice('Bearer '.length).trim();
 
   let clerkId: string;
+  let azp: string | undefined;
   try {
     const payload = await verifyToken(token, { secretKey, authorizedParties });
     clerkId = payload.sub;
+    azp = typeof payload.azp === 'string' ? payload.azp : undefined;
   } catch {
     return null;
   }
 
-  return getUserByClerkId(clerkId);
+  const user = await getUserByClerkId(clerkId);
+  return user && { user, fromOtherApp: azp !== ownOrigin };
 }
 
 /**
