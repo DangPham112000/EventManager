@@ -14,6 +14,7 @@ import { DELETE_EVENT } from '@/graphql/mutations';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setSelectedEventId, openEventModal } from '@/store/uiSlice';
 import { AttendeeList, ParticipationControls } from './EventParticipation';
+import { SplitCostsButton } from './SplitCostsButton';
 import { EventIcon } from './EventIcon';
 import { formatDuration, formatTimeRange } from '@/lib/formatEventTime';
 import {
@@ -143,6 +144,8 @@ export function EventDetailPanel() {
               <Separator className="my-1" />
 
               <ParticipationControls event={event} onLeft={handleClose} />
+
+              <SplitCostsButton event={event} />
 
               {/* Actions: only the creator can edit or delete */}
               {event.isOwner && (

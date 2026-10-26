@@ -9,6 +9,7 @@ import { useAppDispatch } from '@/store';
 import { openEventModal } from '@/store/uiSlice';
 import { AttendeeList, ParticipationControls } from '@/components/events/EventParticipation';
 import { EventIcon } from '@/components/events/EventIcon';
+import { SplitCostsButton } from '@/components/events/SplitCostsButton';
 import {
   ArrowLeft,
   MapPin,
@@ -177,6 +178,7 @@ export function EventDetail() {
         <div className="flex max-w-md flex-col gap-6">
           <AttendeeList event={event} />
           <ParticipationControls event={event} shareToken={shareToken} />
+          <SplitCostsButton event={event} className="w-fit" />
         </div>
       </div>
     </div>
