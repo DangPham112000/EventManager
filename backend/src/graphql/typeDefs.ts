@@ -119,6 +119,12 @@ export const typeDefs = `#graphql
     calendarShare: CalendarShare!
     "The calendar behind a share link. Needs no sign-in; null when the link is unknown or sharing is off."
     sharedCalendar(token: String!): SharedCalendar
+    """
+    The user's joined events that overlap a time range (back-to-back events do not count), sorted by
+    start time. Skips excludeEventId, the event being moved. Other ecosystem apps (Journei) use it to
+    warn about clashes before or after saving.
+    """
+    conflicts(startTime: String!, endTime: String!, excludeEventId: ID): [Event!]!
   }
 
   type Mutation {

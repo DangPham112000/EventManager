@@ -5,6 +5,7 @@ import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js';
 import type { CreateEventInput, IEvent, IUser, Participation, UpdateEventInput } from '../data/types.js';
 import { isMember, participationOf } from '../participation.js';
 import { isEventIcon } from '../icons.js';
+import { conflictsWith } from '../schedule.js';
 import {
   getCalendarShare,
   getSharedCalendar,
@@ -94,6 +95,21 @@ export const resolvers = {
 
     // Public: anyone with the link may read it, signed in or not.
     sharedCalendar: async (_: unknown, { token }: { token: string }) => getSharedCalendar(token),
+
+    conflicts: async (
+      _: unknown,
+      { startTime, endTime, excludeEventId }: { startTime: string; endTime: string; excludeEventId?: string | null },
+      ctx: Context,
+    ) => {
+      const user = requireUser(ctx);
+      const start = Date.parse(startTime);
+      const end = Date.parse(endTime);
+      if (Number.isNaN(start) || Number.isNaN(end) || end <= start) {
+        throw new GraphQLError('endTime must be a date after startTime', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+      const nearby = await getDataSource().getUserEvents(user.id, new Date(start), new Date(end));
+      return conflictsWith({ startTime, endTime }, nearby, user.id, excludeEventId ?? undefined);
+    },
   },
 
   Event: {

@@ -60,6 +60,7 @@ It never carries the creator or attendees.
 | `apiKeys`              | `[ApiKey!]!` | Current user's MCP API keys          |
 | `calendarShare`        | `CalendarShare!` | Current user's calendar share settings |
 | `sharedCalendar(token: String!)` | `SharedCalendar` | `{ ownerName, mode, events: [SharedEvent!]! }` behind a share link; no sign-in needed; null when the link is unknown or turned off |
+| `conflicts(startTime: String!, endTime: String!, excludeEventId: ID)` | `[Event!]!` | The user's JOINED events overlapping the range (back-to-back does not count), skipping `excludeEventId`; used by Journei (DAN-95) to warn about clashes |
 
 ## Mutations
 

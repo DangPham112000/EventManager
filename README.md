@@ -75,6 +75,13 @@ Tools: `list_events`, `get_event`, `check_availability`, `find_conflicts`, `crea
 
 `MCP_TIMEZONE` (default `Asia/Ho_Chi_Minh`) sets the timezone the agent is told to assume and the one used for readable times in tool results. In mock mode (`USE_MOCK=true`) `/mcp` needs no key and acts as the seed user.
 
+## Called by other apps
+
+Other ecosystem apps call this GraphQL API server to server with the user's own Clerk session token, so every ownership check stays here. Today that is Journei (DAN-95): it creates, moves and deletes an event for each activity of a trip plan synced to the calendar, and uses the `conflicts(startTime, endTime, excludeEventId)` query to warn about clashes.
+
+- The caller's origin must be in `CLERK_AUTHORIZED_PARTIES`, because a session token's `azp` claim is the app that issued it.
+- On the shared `ecosystem` Docker network the backend answers as `http://event-manager-backend:4000/graphql` (a network alias in `docker-compose.yml`), so calls do not leave the VPS.
+
 ## Deployment
 
 Production runs on a VPS shared with other projects, at `https://events.dantepham.site`.
@@ -126,7 +133,7 @@ Browser ─HTTPS─▶ Cloudflare (proxied, SSL "Flexible")
    # Local port the host nginx proxies to (must match events.conf).
    APP_PORT=8080
    PUBLIC_URL=https://events.dantepham.site
-   CLERK_AUTHORIZED_PARTIES=https://events.dantepham.site
+   CLERK_AUTHORIZED_PARTIES=https://events.dantepham.site,https://journei.dantepham.site
    ```
    Keep secrets out of this file; they come from Doppler (next step).
 5. **Doppler.** Install the [Doppler CLI](https://docs.doppler.com/docs/install-cli), create a read-only service token for project `event-manager`, config `prd`, and store it for the `deploy` user, scoped to the app folder:
@@ -149,7 +156,7 @@ Everything else the workflow needs is in Doppler (next section), so values can b
 
 ### Secrets (Doppler)
 
-App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY` (`${shared.prd.CLERK_SECRET_KEY}`), `CLERK_PUBLISHABLE_KEY` (`${shared.prd.CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES` (only `https://events.dantepham.site`, so session tokens from other ecosystem apps are refused), `PUBLIC_URL`, and the deploy job's SSH settings `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY` (references to `${shared.prd.*}`, the same for every app; masked in the logs). The frontend build reads `CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN` and passes it as `VITE_CLERK_PUBLISHABLE_KEY` (there is no `VITE_` copy in Doppler, because Doppler does not allow a reference to a reference); the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
+App secrets live in [Doppler](https://www.doppler.com), project `event-manager`, config `prd`: `CLERK_SECRET_KEY` (`${shared.prd.CLERK_SECRET_KEY}`), `CLERK_PUBLISHABLE_KEY` (`${shared.prd.CLERK_PUBLISHABLE_KEY}`), `CLERK_AUTHORIZED_PARTIES` (`https://events.dantepham.site,https://journei.dantepham.site`: Event Manager's own origin plus the apps that call its API with the user's session token, see [Called by other apps](#called-by-other-apps); tokens from any other app are refused), `PUBLIC_URL`, and the deploy job's SSH settings `VPS_HOST`, `VPS_USERNAME`, `VPS_SSH_KEY` (references to `${shared.prd.*}`, the same for every app; masked in the logs). The frontend build reads `CLERK_PUBLISHABLE_KEY` with `DOPPLER_TOKEN` and passes it as `VITE_CLERK_PUBLISHABLE_KEY` (there is no `VITE_` copy in Doppler, because Doppler does not allow a reference to a reference); the VPS reads the rest through `doppler run`. After changing a secret, re-run the deploy workflow (a publishable key change needs the rebuild too).
 
 ### What a deploy does
 
