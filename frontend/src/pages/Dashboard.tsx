@@ -71,7 +71,7 @@ export function Dashboard() {
   }
 
   return (
-    <div className="h-full">
+    <div className="glass h-full overflow-hidden rounded-2xl sm:rounded-3xl">
       {calendarView === 'listUpcoming' ? (
         <UpcomingList events={calendarEvents} />
       ) : (

@@ -71,7 +71,7 @@ export function EventDetailPanel() {
     <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <SheetContent
         side="bottom"
-        className="max-h-[70dvh] overflow-hidden rounded-t-2xl safe-bottom sm:max-h-dvh sm:w-[380px] sm:rounded-none sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-0 sm:data-[side=bottom]:left-auto sm:data-[side=bottom]:border-l sm:data-[side=bottom]:border-t-0"
+        className="max-h-[70dvh] overflow-hidden rounded-t-3xl border-b-0 safe-bottom sm:max-h-[calc(100dvh-1.5rem)] sm:w-[380px] sm:rounded-3xl sm:border-b sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-3 sm:data-[side=bottom]:bottom-3 sm:data-[side=bottom]:left-auto"
       >
         {loading ? (
           <div className="flex items-center justify-center py-12">

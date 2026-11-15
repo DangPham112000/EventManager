@@ -52,7 +52,7 @@ export function Header() {
   const views = ['dayGridMonth', 'timeGridWeek', 'timeGridDay', 'listUpcoming'] as const;
 
   return (
-    <header className="flex w-full min-w-0 items-center gap-1 border-b border-border bg-background/80 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.25rem,env(safe-area-inset-left))] backdrop-blur-md sm:gap-2 sm:px-4">
+    <header className="glass-strong flex w-full min-w-0 items-center gap-1 rounded-none border-x-0 border-t-0 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.25rem,env(safe-area-inset-left))] sm:gap-2 sm:px-4">
       {/* Hamburger — opens sheet sidebar */}
       <Button
         variant="ghost"
@@ -110,7 +110,7 @@ export function Header() {
 
       {/* Participation filter — next to the title, applies to every view */}
       <div
-        className="ml-1 hidden items-center gap-0.5 rounded-lg bg-secondary p-0.5 sm:flex"
+        className="glass ml-1 hidden items-center gap-0.5 rounded-full p-1 sm:flex"
         role="radiogroup"
         aria-label="Filter events"
       >
@@ -120,9 +120,9 @@ export function Header() {
             role="radio"
             aria-checked={filter === value}
             onClick={() => dispatch(setParticipationFilter(value))}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors no-select ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors no-select ${
               filter === value
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'glass-thumb text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -137,10 +137,10 @@ export function Header() {
           const currentIndex = FILTERS.findIndex(([value]) => value === filter);
           dispatch(setParticipationFilter(FILTERS[(currentIndex + 1) % FILTERS.length][0]));
         }}
-        className={`flex shrink-0 items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium no-select sm:hidden ${
+        className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-xs font-medium no-select sm:hidden ${
           filter === 'ALL'
-            ? 'bg-secondary text-secondary-foreground'
-            : 'bg-primary text-primary-foreground'
+            ? 'glass text-secondary-foreground'
+            : 'glass-primary text-primary-foreground'
         }`}
         aria-label={`Filter events: ${filterLabel}`}
       >
@@ -152,14 +152,14 @@ export function Header() {
       <div className="flex-1" />
 
       {/* View switcher — compact on mobile */}
-      <div className="hidden items-center gap-0.5 rounded-lg bg-secondary p-0.5 sm:flex">
+      <div className="glass hidden items-center gap-0.5 rounded-full p-1 sm:flex">
         {views.map((v) => (
           <button
             key={v}
             onClick={() => dispatch(setCalendarView(v))}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors no-select ${
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors no-select ${
               calendarView === v
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'glass-thumb text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -176,7 +176,7 @@ export function Header() {
             const nextView = views[(currentIndex + 1) % views.length];
             dispatch(setCalendarView(nextView));
           }}
-          className="rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground no-select"
+          className="glass rounded-full px-3 py-1.5 text-xs font-medium text-secondary-foreground no-select"
         >
           {viewLabels[calendarView]}
         </button>

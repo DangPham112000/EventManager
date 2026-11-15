@@ -34,11 +34,11 @@ export function Sidebar() {
       open={isOpen}
       onOpenChange={(open) => dispatch(setSidebarOpen(open))}
     >
-      <SheetContent side="left" className="w-[280px] p-0 safe-left sm:max-w-[300px]">
+      <SheetContent side="left" className="w-[280px] rounded-r-3xl border-l-0 p-0 safe-left sm:max-w-[300px]">
         {/* Header / Branding */}
         <SheetHeader className="px-4 pt-4 pb-2">
           <SheetTitle className="flex items-center gap-2 text-lg">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+            <div className="flex h-8 w-8 items-center justify-center glass-primary rounded-xl">
               <Calendar className="h-4 w-4 text-primary-foreground" />
             </div>
             Event Manager
@@ -48,7 +48,7 @@ export function Sidebar() {
         {/* Create Event */}
         <div className="px-4 py-2">
           <Button
-            className="w-full justify-start gap-2 rounded-xl"
+            className="h-10 w-full justify-start gap-2 px-4"
             onClick={() => {
               dispatch(openEventModal());
               dispatch(setSidebarOpen(false));
@@ -72,21 +72,21 @@ export function Sidebar() {
         <nav className="flex flex-col gap-0.5 px-2 py-1">
           <button
             onClick={() => handleNavigate('/')}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
           >
             <LayoutDashboard className="h-4 w-4 text-muted-foreground" />
             Dashboard
           </button>
           <button
             onClick={() => handleNavigate('/ai-agents')}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
           >
             <Bot className="h-4 w-4 text-muted-foreground" />
             AI agents
           </button>
           <button
             onClick={() => handleNavigate('/sharing')}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent no-select touch-target"
           >
             <Share2 className="h-4 w-4 text-muted-foreground" />
             Share calendar

@@ -28,7 +28,7 @@ function CopyBlock({ label, text }: { label: string; text: string }) {
           {copied ? 'Copied' : 'Copy'}
         </Button>
       </div>
-      <pre className="overflow-x-auto rounded-lg bg-secondary p-3 text-xs leading-relaxed whitespace-pre">
+      <pre className="overflow-x-auto rounded-2xl bg-muted p-3 text-xs leading-relaxed whitespace-pre">
         {text}
       </pre>
     </div>
@@ -88,7 +88,7 @@ export function AiAgents() {
           </p>
         </div>
 
-        <div className="space-y-2 rounded-xl border border-border p-3">
+        <div className="glass space-y-2 rounded-3xl p-4">
           <Label>Easiest: sign in from your AI app</Label>
           <p className="text-sm text-muted-foreground">
             In Gemini, claude.ai, ChatGPT or Claude Desktop, add a custom connector with this URL. When
@@ -120,7 +120,7 @@ export function AiAgents() {
         </form>
 
         {newKey && (
-          <div className="space-y-2 rounded-xl border border-primary/40 p-3">
+          <div className="glass space-y-2 rounded-3xl border-primary/40! p-4">
             <p className="text-sm font-medium">Copy this key now. It will not be shown again.</p>
             <CopyBlock label="API key" text={newKey} />
           </div>
@@ -146,9 +146,9 @@ export function AiAgents() {
           ) : !data?.apiKeys.length ? (
             <p className="text-sm text-muted-foreground">No keys yet.</p>
           ) : (
-            <ul className="divide-y divide-border rounded-xl border border-border">
+            <ul className="glass divide-y divide-border overflow-hidden rounded-3xl">
               {data.apiKeys.map((k) => (
-                <li key={k.id} className="flex items-center gap-3 px-3 py-2">
+                <li key={k.id} className="flex items-center gap-3 px-4 py-2.5">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{k.name}</p>
                     <p className="text-xs text-muted-foreground">

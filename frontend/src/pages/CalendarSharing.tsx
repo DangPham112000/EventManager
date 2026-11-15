@@ -71,7 +71,7 @@ export function CalendarSharing() {
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         ) : (
           <>
-            <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border p-3">
+            <label className="glass flex cursor-pointer items-center justify-between gap-4 rounded-3xl p-4">
               <span className="min-w-0">
                 <span className="block text-sm font-medium">Share my calendar</span>
                 <span className="block text-xs text-muted-foreground">
@@ -104,8 +104,8 @@ export function CalendarSharing() {
                       aria-checked={selected}
                       disabled={updating}
                       onClick={() => !selected && updateShare({ variables: { mode: value } })}
-                      className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors no-select ${
-                        selected ? 'border-primary bg-primary/5' : 'border-border hover:bg-accent'
+                      className={`glass flex items-start gap-3 rounded-3xl p-4 text-left transition-colors no-select ${
+                        selected ? 'border-primary! bg-primary/10' : 'hover:bg-accent'
                       }`}
                     >
                       <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${selected ? 'text-primary' : 'text-muted-foreground'}`} />
@@ -125,7 +125,7 @@ export function CalendarSharing() {
                 <div className="space-y-2">
                   <Label>Link</Label>
                   <div className="flex items-center gap-2">
-                    <code className="min-w-0 flex-1 truncate rounded-lg bg-secondary px-3 py-2 text-xs">
+                    <code className="min-w-0 flex-1 truncate rounded-xl bg-muted px-3 py-2 text-xs">
                       {link}
                     </code>
                     <Button variant="outline" size="sm" onClick={copyLink} aria-label="Copy link">

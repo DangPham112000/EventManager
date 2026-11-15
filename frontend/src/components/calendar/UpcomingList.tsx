@@ -93,7 +93,7 @@ export function UpcomingList({ events, onSelect }: UpcomingListProps) {
     <div className="h-full overflow-auto">
       {groups.map((group) => (
         <section key={group.key}>
-          <h2 className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-muted px-4 py-2 text-sm font-semibold">
+          <h2 className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/70 px-4 py-2 text-sm font-semibold backdrop-blur-xl">
             <span>{group.day.toLocaleDateString('en-US', { weekday: 'long' })}</span>
             <span>
               {group.day.toLocaleDateString('en-US', {
