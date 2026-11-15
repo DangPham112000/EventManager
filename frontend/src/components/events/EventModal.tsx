@@ -348,9 +348,9 @@ function IconPicker({ value, suggested, onChange }: IconPickerProps) {
         title={label}
         onClick={() => onChange(key)}
         className={cn(
-          'flex h-9 items-center justify-center gap-1 rounded-md border text-xs transition-colors',
+          'flex h-9 items-center justify-center gap-1 rounded-xl border text-xs transition-colors',
           selected
-            ? 'border-primary bg-primary text-primary-foreground'
+            ? 'glass-primary text-primary-foreground'
             : 'border-border text-foreground hover:bg-accent',
         )}
       >

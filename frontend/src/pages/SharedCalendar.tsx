@@ -33,7 +33,7 @@ function SharedEventSheet({ event, onClose }: { event: SharedEvent | null; onClo
     <Sheet open={event !== null} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="max-h-[70dvh] overflow-hidden rounded-t-2xl safe-bottom sm:max-h-dvh sm:w-[380px] sm:rounded-none sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-0 sm:data-[side=bottom]:left-auto sm:data-[side=bottom]:border-l sm:data-[side=bottom]:border-t-0"
+        className="max-h-[70dvh] overflow-hidden rounded-t-3xl border-b-0 safe-bottom sm:max-h-[calc(100dvh-1.5rem)] sm:w-[380px] sm:rounded-3xl sm:border-b sm:data-[side=bottom]:inset-x-auto sm:data-[side=bottom]:right-3 sm:data-[side=bottom]:bottom-3 sm:data-[side=bottom]:left-auto"
       >
         {event && (
           <>
@@ -131,7 +131,7 @@ export function SharedCalendar() {
 
   if (loading && !data) {
     return (
-      <div className="flex h-dvh items-center justify-center bg-background">
+      <div className="flex h-dvh items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -139,8 +139,8 @@ export function SharedCalendar() {
 
   if (error || !calendar) {
     return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-3 bg-background px-6 text-center safe-top">
-        <div className="rounded-full bg-secondary p-3">
+      <div className="flex h-dvh flex-col items-center justify-center gap-3 px-6 text-center safe-top">
+        <div className="glass rounded-full p-3">
           <Lock className="h-6 w-6 text-muted-foreground" />
         </div>
         <p className="text-sm font-medium">This calendar link does not work</p>
@@ -155,9 +155,9 @@ export function SharedCalendar() {
   const isUpcomingList = calendarView === 'listUpcoming';
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-background safe-top">
-      <header className="flex w-full min-w-0 items-center gap-1 border-b border-border bg-background/80 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))] backdrop-blur-md sm:gap-2 sm:px-4">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
+    <div className="flex h-dvh w-full flex-col overflow-hidden safe-top">
+      <header className="glass-strong flex w-full min-w-0 items-center gap-1 rounded-none border-x-0 border-t-0 py-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))] sm:gap-2 sm:px-4">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center glass-primary rounded-xl">
           <Calendar className="h-4 w-4 text-primary-foreground" />
         </div>
         <div className="flex min-w-0 items-center sm:gap-1">
@@ -196,14 +196,14 @@ export function SharedCalendar() {
           )}
         </div>
         <div className="flex-1" />
-        <div className="hidden items-center gap-0.5 rounded-lg bg-secondary p-0.5 sm:flex">
+        <div className="glass hidden items-center gap-0.5 rounded-full p-1 sm:flex">
           {VIEWS.map((v) => (
             <button
               key={v}
               onClick={() => dispatch(setCalendarView(v))}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors no-select ${
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors no-select ${
                 calendarView === v
-                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  ? 'glass-thumb text-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -213,24 +213,26 @@ export function SharedCalendar() {
         </div>
         <button
           onClick={() => dispatch(setCalendarView(VIEWS[(VIEWS.indexOf(calendarView) + 1) % VIEWS.length]))}
-          className="shrink-0 rounded-md bg-secondary px-2.5 py-1.5 text-xs font-medium text-secondary-foreground no-select sm:hidden"
+          className="glass shrink-0 rounded-full px-3 py-1.5 text-xs font-medium text-secondary-foreground no-select sm:hidden"
         >
           {VIEW_LABELS[calendarView]}
         </button>
       </header>
 
-      <div className="flex min-w-0 items-center gap-2 border-b border-border bg-muted/50 px-4 py-1.5 text-xs text-muted-foreground">
+      <div className="flex min-w-0 items-center gap-2 px-4 pt-2 text-xs text-muted-foreground sm:pt-3">
         <span className="min-w-0 truncate font-medium text-foreground">{calendar.ownerName}'s calendar</span>
         <span className="shrink-0">·</span>
         <span className="shrink-0">{isPublic ? 'Read only' : 'Busy times only'}</span>
       </div>
 
-      <main className="min-h-0 min-w-0 flex-1 overflow-hidden pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-        {isUpcomingList ? (
-          <UpcomingList events={calendarEvents} onSelect={handleSelect} />
-        ) : (
-          <CalendarView events={calendarEvents} readOnly onEventClick={handleSelect} />
-        )}
+      <main className="min-h-0 min-w-0 flex-1 overflow-hidden pt-1.5 pr-[max(0.375rem,env(safe-area-inset-right))] pb-[max(0.375rem,env(safe-area-inset-bottom))] pl-[max(0.375rem,env(safe-area-inset-left))] sm:p-3">
+        <div className="glass h-full overflow-hidden rounded-2xl sm:rounded-3xl">
+          {isUpcomingList ? (
+            <UpcomingList events={calendarEvents} onSelect={handleSelect} />
+          ) : (
+            <CalendarView events={calendarEvents} readOnly onEventClick={handleSelect} />
+          )}
+        </div>
       </main>
 
       <SharedEventSheet event={selectedEvent} onClose={() => setSelectedId(null)} />
