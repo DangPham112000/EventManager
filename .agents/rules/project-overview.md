@@ -10,6 +10,7 @@ An Event Manager application where users can create, manage, and participate in 
 
 ### Event Management
 - Users can create new events (Title, Description, Start Time, End Time, Location).
+  - The create form shows only the required fields (Title, Start, End); a "More options" toggle shows the optional ones (Icon, Type, Location, Description) and keeps their values when hidden. The edit form opens with every field shown.
 - Users can update or delete their own events.
 
 ### Participation

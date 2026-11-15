@@ -16,7 +16,7 @@ import { CREATE_EVENT, UPDATE_EVENT } from '@/graphql/mutations';
 import { GET_EVENTS, GET_EVENT } from '@/graphql/queries';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { closeEventModal } from '@/store/uiSlice';
-import { Ban, Loader2, Sparkles } from 'lucide-react';
+import { Ban, ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import type { Participation } from '@/graphql/types';
 import { IconGlyph } from './EventIcon';
 import { EVENT_ICONS, EVENT_ICON_KEYS, NO_ICON, suggestEventIcon } from '@/lib/eventIcons';
@@ -84,6 +84,9 @@ export function EventModal() {
     icon: null,
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  // Optional fields (icon, type, location, description) are hidden behind
+  // "More options" when creating, so a quick event only needs a title and a time.
+  const [showOptional, setShowOptional] = useState(false);
 
   // Fetch event data when editing
   const { data: eventData } = useQuery<GetEventData>(GET_EVENT, {
@@ -124,6 +127,7 @@ export function EventModal() {
       });
     }
     setErrors({});
+    setShowOptional(isEditing);
   }, [isEditing, eventData, isOpen, selectedDate]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
@@ -174,6 +178,15 @@ export function EventModal() {
     }
   };
 
+  // Optional fields that differ from a new event's defaults; shown next to
+  // "More options" so hidden values are not forgotten.
+  const filledOptional = [
+    form.icon !== null,
+    form.participation !== 'JOINED',
+    form.location.trim() !== '',
+    form.description.trim() !== '',
+  ].filter(Boolean).length;
+
   const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
@@ -223,42 +236,6 @@ export function EventModal() {
             )}
           </div>
 
-          {/* Icon */}
-          <IconPicker
-            value={form.icon}
-            suggested={suggestEventIcon(form)}
-            onChange={(icon) => updateField('icon', icon)}
-          />
-
-          {/* Participation */}
-          <div className="flex flex-col gap-1.5">
-            <Label>Type</Label>
-            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Event type">
-              {(
-                [
-                  ['JOINED', 'Joined'],
-                  ['INTERESTED', 'Just interested'],
-                ] as const
-              ).map(([value, label]) => (
-                <Button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={form.participation === value}
-                  variant={form.participation === value ? 'default' : 'outline'}
-                  onClick={() => updateField('participation', value)}
-                >
-                  {label}
-                </Button>
-              ))}
-            </div>
-            {form.participation === 'INTERESTED' && (
-              <p className="text-xs text-muted-foreground">
-                Interested events are not counted when checking for schedule conflicts.
-              </p>
-            )}
-          </div>
-
           {/* Start Time */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="event-start">Start</Label>
@@ -289,28 +266,87 @@ export function EventModal() {
             )}
           </div>
 
-          {/* Location */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="event-location">Location</Label>
-            <Input
-              id="event-location"
-              placeholder="Add location (optional)"
-              value={form.location}
-              onChange={(e) => updateField('location', e.target.value)}
+          {/* Optional fields */}
+          <button
+            type="button"
+            onClick={() => setShowOptional((v) => !v)}
+            aria-expanded={showOptional}
+            aria-controls="event-optional-fields"
+            className="glass flex items-center justify-between gap-2 self-start rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground no-select"
+          >
+            <span>
+              {showOptional ? 'Fewer options' : 'More options'}
+              {!showOptional && filledOptional > 0 && (
+                <span className="text-foreground"> · {filledOptional} set</span>
+              )}
+            </span>
+            <ChevronDown
+              className={cn('h-3.5 w-3.5 transition-transform', showOptional && 'rotate-180')}
             />
-          </div>
+          </button>
 
-          {/* Description */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="event-description">Description</Label>
-            <Textarea
-              id="event-description"
-              placeholder="Add description (optional)"
-              value={form.description}
-              onChange={(e) => updateField('description', e.target.value)}
-              rows={3}
-            />
-          </div>
+          {showOptional && (
+            <div id="event-optional-fields" className="flex flex-col gap-4">
+              {/* Icon */}
+              <IconPicker
+                value={form.icon}
+                suggested={suggestEventIcon(form)}
+                onChange={(icon) => updateField('icon', icon)}
+              />
+
+              {/* Participation */}
+              <div className="flex flex-col gap-1.5">
+                <Label>Type</Label>
+                <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Event type">
+                  {(
+                    [
+                      ['JOINED', 'Joined'],
+                      ['INTERESTED', 'Just interested'],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <Button
+                      key={value}
+                      type="button"
+                      role="radio"
+                      aria-checked={form.participation === value}
+                      variant={form.participation === value ? 'default' : 'outline'}
+                      onClick={() => updateField('participation', value)}
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </div>
+                {form.participation === 'INTERESTED' && (
+                  <p className="text-xs text-muted-foreground">
+                    Interested events are not counted when checking for schedule conflicts.
+                  </p>
+                )}
+              </div>
+
+              {/* Location */}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="event-location">Location</Label>
+                <Input
+                  id="event-location"
+                  placeholder="Add location (optional)"
+                  value={form.location}
+                  onChange={(e) => updateField('location', e.target.value)}
+                />
+              </div>
+
+              {/* Description */}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="event-description">Description</Label>
+                <Textarea
+                  id="event-description"
+                  placeholder="Add description (optional)"
+                  value={form.description}
+                  onChange={(e) => updateField('description', e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
